@@ -204,11 +204,18 @@ public final class MemcachedCommandDecoder extends FrameDecoder {
                 // Fill in all the elements of the command
                 int size = BufferUtils.atoi(parts.get(4));
                 long expire = BufferUtils.atoi(parts.get(3)) * 1000;
+
                 int flags = BufferUtils.atoi(parts.get(MIN_BYTES_LINE));
+
+                // Client has to set the expiration
+//                cmd.element = new LocalCacheElement(
+//                    parts.get(1).slice().toString(Charset.forName("UTF8")),
+//                    flags, expire != 0 && expire < CacheElement.THIRTY_DAYS ? LocalCacheElement.Now() + expire : expire,
+//                    0L
+//                );
+
                 cmd.element = new LocalCacheElement(
-                    parts.get(1).slice().toString(Charset.forName("UTF8")),
-                    flags, expire != 0 && expire < CacheElement.THIRTY_DAYS ? LocalCacheElement.Now() + expire : expire,
-                    0L
+                    parts.get(1).slice().toString(Charset.forName("UTF8")), flags, expire, 0L
                 );
 
                 // look for cas and "noreply" elements

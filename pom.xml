@@ -12,59 +12,27 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
 
-    <licenses>
-        <license>
-            <name>Apache 2</name>
-            <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
-        </license>
-    </licenses>
-
     <developers>
-        <developer>
-            <email>ryan@thimbleware.com</email>
-            <name>Ryan Daum</name>
-            <organization>ThimbleWare Inc</organization>
-            <organizationUrl>http://www.thimbleware.com/</organizationUrl>
-            <roles>
-                <role>maintainer</role>
-            </roles>
-        </developer>
-
         <developer>
             <email>wolfram.huesken@zalora.com</email>
             <name>Wolfram Huesken</name>
             <organization>Zalora Group</organization>
             <organizationUrl>https://www.zalora.com</organizationUrl>
-            <roles>
-                <role>maintainer</role>
-            </roles>
+        </developer>
+
+        <developer>
+            <email>ryan@thimbleware.com</email>
+            <name>Ryan Daum</name>
+            <organization>ThimbleWare Inc</organization>
+            <organizationUrl>http://www.thimbleware.com/</organizationUrl>
         </developer>
     </developers>
 
     <dependencies>
         <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
-            <version>4.8.2</version>
-            <scope>test</scope>
-        </dependency>
-
-        <dependency>
+            <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
-            <groupId>org.slf4j</groupId>
-            <version>1.5.11</version>
-        </dependency>
-
-        <dependency>
-            <artifactId>slf4j-jdk14</artifactId>
-            <groupId>org.slf4j</groupId>
-            <version>1.5.11</version>
-        </dependency>
-
-        <dependency>
-            <artifactId>slf4j-log4j12</artifactId>
-            <groupId>org.slf4j</groupId>
-            <version>1.5.11</version>
+            <version>1.7.21</version>
         </dependency>
 
         <dependency>
