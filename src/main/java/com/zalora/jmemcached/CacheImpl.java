@@ -28,14 +28,14 @@ import java.util.concurrent.*;
  */
 public final class CacheImpl extends AbstractCache<LocalCacheElement> implements Cache<LocalCacheElement> {
 
-    final CacheStorage<Key, LocalCacheElement> storage;
+    final CacheStorage<String, LocalCacheElement> storage;
     final DelayQueue<DelayedMCElement> deleteQueue;
     private final ScheduledExecutorService scavenger;
 
     /**
      * @inheritDoc
      */
-    public CacheImpl(CacheStorage<Key, LocalCacheElement> storage) {
+    public CacheImpl(CacheStorage<String, LocalCacheElement> storage) {
         super();
         this.storage = storage;
         deleteQueue = new DelayQueue<DelayedMCElement>();
@@ -51,7 +51,7 @@ public final class CacheImpl extends AbstractCache<LocalCacheElement> implements
     /**
      * @inheritDoc
      */
-    public DeleteResponse delete(Key key, int time) {
+    public DeleteResponse delete(String key, int time) {
         boolean removed = false;
 
         // delayed remove
@@ -163,7 +163,7 @@ public final class CacheImpl extends AbstractCache<LocalCacheElement> implements
     /**
      * @inheritDoc
      */
-    public Integer get_add(Key key, int mod) {
+    public Integer get_add(String key, int mod) {
         LocalCacheElement old = storage.get(key);
         if (old == null || isBlocked(old) || isExpired(old)) {
             getMisses.incrementAndGet();
@@ -186,14 +186,14 @@ public final class CacheImpl extends AbstractCache<LocalCacheElement> implements
     /**
      * @inheritDoc
      */
-    public LocalCacheElement[] get(Key ... keys) {
+    public LocalCacheElement[] get(String ... keys) {
         getCmds.incrementAndGet();//updates stats
 
         LocalCacheElement[] elements = new LocalCacheElement[keys.length];
         int x = 0;
         int hits = 0;
         int misses = 0;
-        for (Key key : keys) {
+        for (String key : keys) {
             LocalCacheElement e = storage.get(key);
             if (e == null || isExpired(e) || e.isBlocked()) {
                 misses++;
@@ -242,7 +242,7 @@ public final class CacheImpl extends AbstractCache<LocalCacheElement> implements
      * @inheritDoc
      */
     @Override
-    protected Set<Key> keys() {
+    protected Set<String> keys() {
         return storage.keySet();
     }
 

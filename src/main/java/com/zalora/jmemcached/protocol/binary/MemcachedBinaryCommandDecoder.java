@@ -11,13 +11,10 @@ import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelHandler;
 import org.jboss.netty.channel.ChannelHandlerContext;
 import org.jboss.netty.handler.codec.frame.FrameDecoder;
-
 import java.nio.charset.Charset;
-import java.util.ArrayList;
 import java.nio.ByteOrder;
+import java.util.ArrayList;
 
-/**
- */
 @ChannelHandler.Sharable
 public class MemcachedBinaryCommandDecoder extends FrameDecoder {
 
@@ -72,7 +69,8 @@ public class MemcachedBinaryCommandDecoder extends FrameDecoder {
 
         public static BinaryOp forCommandMessage(CommandMessage msg) {
             for (BinaryOp binaryOp : values()) {
-                if (binaryOp.correspondingOp == msg.op && binaryOp.noreply == msg.noreply && binaryOp.addKeyToResponse == msg.addKeyToResponse) {
+                if (binaryOp.correspondingOp == msg.op && binaryOp.noreply == msg.noreply &&
+                    binaryOp.addKeyToResponse == msg.addKeyToResponse) {
                     return binaryOp;
                 }
             }
@@ -82,7 +80,8 @@ public class MemcachedBinaryCommandDecoder extends FrameDecoder {
 
     }
 
-    protected Object decode(ChannelHandlerContext channelHandlerContext, Channel channel, ChannelBuffer channelBuffer) throws Exception {
+    protected Object decode(ChannelHandlerContext channelHandlerContext, Channel channel, ChannelBuffer channelBuffer)
+        throws Exception {
 
         // need at least 24 bytes, to get header
         if (channelBuffer.readableBytes() < 24) return null;
@@ -135,8 +134,8 @@ public class MemcachedBinaryCommandDecoder extends FrameDecoder {
             ChannelBuffer keyBuffer = ChannelBuffers.buffer(ByteOrder.BIG_ENDIAN, keyLength);
             channelBuffer.readBytes(keyBuffer);
 
-            ArrayList<Key> keys = new ArrayList<Key>();
-            keys.add(new Key(keyBuffer.copy()));
+            ArrayList<String> keys = new ArrayList<String>();
+            keys.add(keyBuffer.toString(Charset.forName("UTF-8")));
 
             cmdMessage.keys = keys;
 
@@ -154,12 +153,17 @@ public class MemcachedBinaryCommandDecoder extends FrameDecoder {
                 // the remainder of the message -- that is, totalLength - (keyLength + extraLength) should be the payload
                 int size = totalBodyLength - keyLength - extraLength;
 
-                cmdMessage.element = new LocalCacheElement(new Key(keyBuffer.slice()), flags, expire != 0 && expire < CacheElement.THIRTY_DAYS ? LocalCacheElement.Now() + expire : expire, 0L);
+                cmdMessage.element = new LocalCacheElement(
+                    keyBuffer.slice().toString(Charset.forName("UTF-8")),
+                    flags,
+                    expire != 0 && expire < CacheElement.THIRTY_DAYS ? LocalCacheElement.Now() + expire : expire,
+                    0L
+                );
+
                 ChannelBuffer data = ChannelBuffers.buffer(size);
                 channelBuffer.readBytes(data);
                 cmdMessage.element.setData(data);
             } else if (cmdType == Op.INCR || cmdType == Op.DECR) {
-                long initialValue = extrasBuffer.readUnsignedInt();
                 long amount = extrasBuffer.readUnsignedInt();
                 long expiration = extrasBuffer.readUnsignedInt();
 

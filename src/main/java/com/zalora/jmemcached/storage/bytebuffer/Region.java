@@ -3,6 +3,8 @@ package com.zalora.jmemcached.storage.bytebuffer;
 import com.zalora.jmemcached.LocalCacheElement;
 import org.jboss.netty.buffer.ChannelBuffer;
 
+import java.nio.charset.Charset;
+
 /**
      * Represents a number of allocated blocks in the store
  */
@@ -45,11 +47,11 @@ public final class Region {
         this.valid = true;
     }
 
-    public Key keyFromRegion() {
+    public String keyFromRegion() {
         slice.readerIndex(0);
 
         int length = slice.readInt();
-        return new Key(slice.slice(slice.readerIndex(), length));
+        return slice.slice(slice.readerIndex(), length).toString(Charset.forName("UTF-8"));
     }
 
     public LocalCacheElement toValue() {

@@ -4,12 +4,13 @@ import com.zalora.jmemcached.LocalCacheElement;
 import com.zalora.jmemcached.storage.CacheStorage;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.util.*;
 
 /**
  * Implementation of the cache using the block buffer storage back end.
  */
-public final class BlockStorageCacheStorage implements CacheStorage<Key, LocalCacheElement> {
+public final class BlockStorageCacheStorage implements CacheStorage<String, LocalCacheElement> {
 
     Partition[] partitions;
 
@@ -32,7 +33,7 @@ public final class BlockStorageCacheStorage implements CacheStorage<Key, LocalCa
         this.maximumSizeBytes = maximumSizeBytes;
     }
 
-    private Partition pickPartition(Key key) {
+    private Partition pickPartition(String key) {
         return partitions[hash(key.hashCode()) & (partitions.length - 1)];
     }
 
@@ -67,7 +68,7 @@ public final class BlockStorageCacheStorage implements CacheStorage<Key, LocalCa
         this.partitions = null;
     }
 
-    public final LocalCacheElement putIfAbsent(Key key, LocalCacheElement item) {
+    public final LocalCacheElement putIfAbsent(String key, LocalCacheElement item) {
         Partition partition = pickPartition(key);
 
         partition.storageLock.readLock().lock();
@@ -81,6 +82,8 @@ public final class BlockStorageCacheStorage implements CacheStorage<Key, LocalCa
                 try {
                     numberItems++;
                     partition.add(key, item);
+                } catch (UnsupportedEncodingException e) {
+                    e.printStackTrace();
                 } finally {
                     partition.storageLock.readLock().lock();
                     partition.storageLock.writeLock().unlock();
@@ -100,11 +103,10 @@ public final class BlockStorageCacheStorage implements CacheStorage<Key, LocalCa
      * {@inheritDoc}
      */
     public final boolean remove(Object okey, Object value) {
-        if (!(okey instanceof Key) || (!(value instanceof LocalCacheElement))) return false;
+        if (!(okey instanceof String) || (!(value instanceof LocalCacheElement))) return false;
 
-        Key key = (Key) okey;
+        String key = (String) okey;
         Partition partition = pickPartition(key);
-
 
         try {
             partition.storageLock.readLock().lock();
@@ -129,7 +131,7 @@ public final class BlockStorageCacheStorage implements CacheStorage<Key, LocalCa
         }
     }
 
-    public final boolean replace(Key key, LocalCacheElement original, LocalCacheElement replace) {
+    public final boolean replace(String key, LocalCacheElement original, LocalCacheElement replace) {
         Partition partition = pickPartition(key);
 
         partition.storageLock.readLock().lock();
@@ -151,19 +153,21 @@ public final class BlockStorageCacheStorage implements CacheStorage<Key, LocalCa
                     partition.remove(key, region);
                     partition.add(key, replace);
                     return true;
+                } catch (UnsupportedEncodingException e) {
+                    e.printStackTrace();
                 } finally {
                     partition.storageLock.readLock().lock();
                     partition.storageLock.writeLock().unlock();
                 }
-
             }
 
         } finally {
             partition.storageLock.readLock().unlock();
         }
+        return false;
     }
 
-    public final LocalCacheElement replace(Key key, LocalCacheElement replace) {
+    public final LocalCacheElement replace(String key, LocalCacheElement replace) {
         Partition partition = pickPartition(key);
 
         partition.storageLock.readLock().lock();
@@ -182,15 +186,17 @@ public final class BlockStorageCacheStorage implements CacheStorage<Key, LocalCa
                 partition.remove(key, region);
                 partition.add(key, replace);
                 return el;
+            } catch (UnsupportedEncodingException e) {
+                e.printStackTrace();
             } finally {
                 partition.storageLock.readLock().lock();
                 partition.storageLock.writeLock().unlock();
             }
-
-
         } finally {
             partition.storageLock.readLock().unlock();
         }
+
+        return replace;
     }
 
     public final int size() {
@@ -202,9 +208,9 @@ public final class BlockStorageCacheStorage implements CacheStorage<Key, LocalCa
     }
 
     public final boolean containsKey(Object okey) {
-        if (!(okey instanceof Key)) return false;
+        if (!(okey instanceof String)) return false;
 
-        Key key = (Key) okey;
+        String key = (String) okey;
         Partition partition = pickPartition(key);
 
         try {
@@ -220,9 +226,9 @@ public final class BlockStorageCacheStorage implements CacheStorage<Key, LocalCa
     }
 
     public final LocalCacheElement get(Object okey) {
-        if (!(okey instanceof Key)) return null;
+        if (!(okey instanceof String)) return null;
 
-        Key key = (Key) okey;
+        String key = (String) okey;
         Partition partition = pickPartition(key);
 
         try {
@@ -235,7 +241,7 @@ public final class BlockStorageCacheStorage implements CacheStorage<Key, LocalCa
         }
     }
 
-    public final LocalCacheElement put(final Key key, final LocalCacheElement item) {
+    public final LocalCacheElement put(final String key, final LocalCacheElement item) {
         Partition partition = pickPartition(key);
 
         partition.storageLock.readLock().lock();
@@ -253,6 +259,8 @@ public final class BlockStorageCacheStorage implements CacheStorage<Key, LocalCa
                 partition.add(key, item);
                 numberItems++;
                 return old;
+            } catch (UnsupportedEncodingException e) {
+                e.printStackTrace();
             } finally {
                 partition.storageLock.readLock().lock();
                 partition.storageLock.writeLock().unlock();
@@ -262,12 +270,13 @@ public final class BlockStorageCacheStorage implements CacheStorage<Key, LocalCa
         } finally {
             partition.storageLock.readLock().unlock();
         }
+        return item;
     }
 
     public final LocalCacheElement remove(Object okey) {
-        if (!(okey instanceof Key)) return null;
+        if (!(okey instanceof String)) return null;
 
-        Key key = (Key) okey;
+        String key = (String) okey;
         Partition partition = pickPartition(key);
 
         try {
@@ -295,10 +304,10 @@ public final class BlockStorageCacheStorage implements CacheStorage<Key, LocalCa
         }
     }
 
-    public final void putAll(Map<? extends Key, ? extends LocalCacheElement> map) {
+    public final void putAll(Map<? extends String, ? extends LocalCacheElement> map) {
         // absent, lock the store and put the new value in
-        for (Entry<? extends Key, ? extends LocalCacheElement> entry : map.entrySet()) {
-            Key key = entry.getKey();
+        for (Entry<? extends String, ? extends LocalCacheElement> entry : map.entrySet()) {
+            String key = entry.getKey();
             LocalCacheElement item;
             item = entry.getValue();
             put(key, item);
@@ -318,8 +327,8 @@ public final class BlockStorageCacheStorage implements CacheStorage<Key, LocalCa
 
     }
 
-    public Set<Key> keySet() {
-        Set<Key> keys = new HashSet<Key>();
+    public Set<String> keySet() {
+        Set<String> keys = new HashSet<String>();
         for (Partition partition : partitions) {
             keys.addAll(partition.keys());
         }
@@ -331,7 +340,7 @@ public final class BlockStorageCacheStorage implements CacheStorage<Key, LocalCa
         throw new UnsupportedOperationException("operation not supported");
     }
 
-    public Set<Entry<Key, LocalCacheElement>> entrySet() {
+    public Set<Entry<String, LocalCacheElement>> entrySet() {
         throw new UnsupportedOperationException("operation not supported");
     }
 

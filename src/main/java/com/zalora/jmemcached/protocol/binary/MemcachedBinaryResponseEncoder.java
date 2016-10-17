@@ -136,7 +136,7 @@ public class MemcachedBinaryResponseEncoder<CACHE_ELEMENT extends CacheElement> 
         // write key if there is one
         ChannelBuffer keyBuffer = null;
         if (bcmd.addKeyToResponse && command.cmd.keys != null && command.cmd.keys.size() != 0) {
-            keyBuffer = ChannelBuffers.wrappedBuffer(command.cmd.keys.get(0).bytes);
+            keyBuffer = ChannelBuffers.wrappedBuffer(command.cmd.keys.get(0).getBytes("UTF-8"));
         }
 
         // write value if there is one

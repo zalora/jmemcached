@@ -16,6 +16,7 @@ import org.jboss.netty.buffer.ChannelBuffers;
 import org.jboss.netty.channel.*;
 import org.jboss.netty.handler.codec.frame.FrameDecoder;
 
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -204,7 +205,11 @@ public final class MemcachedCommandDecoder extends FrameDecoder {
                 int size = BufferUtils.atoi(parts.get(4));
                 long expire = BufferUtils.atoi(parts.get(3)) * 1000;
                 int flags = BufferUtils.atoi(parts.get(MIN_BYTES_LINE));
-                cmd.element = new LocalCacheElement(new Key(parts.get(1).slice()), flags, expire != 0 && expire < CacheElement.THIRTY_DAYS ? LocalCacheElement.Now() + expire : expire, 0L);
+                cmd.element = new LocalCacheElement(
+                    parts.get(1).slice().toString(Charset.forName("UTF8")),
+                    flags, expire != 0 && expire < CacheElement.THIRTY_DAYS ? LocalCacheElement.Now() + expire : expire,
+                    0L
+                );
 
                 // look for cas and "noreply" elements
                 if (numParts > 5) {

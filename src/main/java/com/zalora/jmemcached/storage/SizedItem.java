@@ -1,4 +1,4 @@
-package com.zalora.jmemcached.storage.hash;
+package com.zalora.jmemcached.storage;
 
 /**
  */

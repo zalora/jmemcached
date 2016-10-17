@@ -1,14 +1,16 @@
 package com.zalora.jmemcached.storage.bytebuffer;
 
-import com.zalora.jmemcached.LocalCacheElement;
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.buffer.ChannelBuffers;
+import com.zalora.jmemcached.LocalCacheElement;
 
-import java.util.*;
+import java.io.UnsupportedEncodingException;
+import java.nio.charset.Charset;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
-/**
- */
 public final class Partition {
     private static final int NUM_BUCKETS = 32768;
 
@@ -20,11 +22,13 @@ public final class Partition {
 
     int numberItems;
 
+    private final Charset UTF8 = Charset.forName("UTF8");
+
     Partition(ByteBufferBlockStore blockStore) {
         this.blockStore = blockStore;
     }
 
-    public Region find(Key key) {
+    public Region find(String key) {
         int bucket = findBucketNum(key);
 
         if (buckets[bucket] == null) return null;
@@ -40,11 +44,10 @@ public final class Partition {
             long timestamp = regions.readLong();
             int rkeySize = regions.readInt();
 
-            if (rkeySize == key.bytes.capacity()) {
+            if (rkeySize == key.length()) {
                 ChannelBuffer rkey = regions.readSlice(rkeySize);
 
-                key.bytes.readerIndex(0);
-                if (rkey.equals(key.bytes)) return new Region(rsize, rusedBlocks, rstartBlock, blockStore.get(rstartBlock, rsize), expiry, timestamp);
+                if (rkey.equals(key.getBytes(UTF8))) return new Region(rsize, rusedBlocks, rstartBlock, blockStore.get(rstartBlock, rsize), expiry, timestamp);
             } else {
                 regions.skipBytes(rkeySize);
             }
@@ -53,7 +56,7 @@ public final class Partition {
         return null;
     }
 
-    public boolean has(Key key) {
+    public boolean has(String key) {
         int bucket = findBucketNum(key);
 
         if (buckets[bucket] == null) return false;
@@ -66,11 +69,10 @@ public final class Partition {
             regions.skipBytes(28);
             int rkeySize = regions.readInt();
 
-            if (rkeySize == key.bytes.capacity()) {
+            if (rkeySize == key.length()) {
                 ChannelBuffer rkey = regions.readSlice(rkeySize);
 
-                key.bytes.readerIndex(0);
-                if (rkey.equals(key.bytes)) return true;
+                if (rkey.equals(key.getBytes(UTF8))) return true;
             } else {
                 regions.skipBytes(rkeySize);
             }
@@ -79,12 +81,12 @@ public final class Partition {
         return false;
     }
 
-    private int findBucketNum(Key key) {
+    private int findBucketNum(String key) {
         int hash = BlockStorageCacheStorage.hash(key.hashCode());
         return hash & (buckets.length - 1);
     }
 
-    public void remove(Key key, Region region) {
+    public void remove(String key, Region region) {
         int bucket = findBucketNum(key);
 
         ChannelBuffer newRegion = ChannelBuffers.dynamicBuffer(128);
@@ -100,7 +102,7 @@ public final class Partition {
             int rkeySize = regions.readInt();
             ChannelBuffer rkey = regions.readBytes(rkeySize);
 
-            if (rkeySize != key.bytes.capacity() || !rkey.equals(key.bytes)) {
+            if (rkeySize != key.length() || !rkey.equals(key.getBytes(UTF8))) {
                 newRegion.writeBytes(regions.slice(pos, regions.readerIndex()));
             }
         }
@@ -110,20 +112,19 @@ public final class Partition {
         numberItems--;
     }
 
-    public Region add(Key key, LocalCacheElement e) {
+    public Region add(String key, LocalCacheElement e) throws UnsupportedEncodingException {
         Region region = blockStore.alloc(e.bufferSize(), e.getExpire(), System.currentTimeMillis());
         e.writeToBuffer(region.slice);
         int bucket = findBucketNum(key);
 
-        ChannelBuffer outbuf = ChannelBuffers.directBuffer(32 + key.bytes.capacity());
+        ChannelBuffer outbuf = ChannelBuffers.directBuffer(32 + key.length());
         outbuf.writeInt(region.size);
         outbuf.writeInt(region.usedBlocks);
         outbuf.writeInt(region.startBlock);
         outbuf.writeLong(region.expiry);
         outbuf.writeLong(region.timestamp);
-        outbuf.writeInt(key.bytes.capacity());
-        key.bytes.readerIndex(0);
-        outbuf.writeBytes(key.bytes);
+        outbuf.writeInt(key.length());
+        outbuf.writeBytes(key.getBytes(UTF8));
 
         ChannelBuffer regions = buckets[bucket];
         if (regions == null) {
@@ -148,8 +149,8 @@ public final class Partition {
         numberItems = 0;
     }
 
-    public Collection<Key> keys() {
-        Set<Key> keys = new HashSet<Key>();
+    public Collection<String> keys() {
+        Set<String> keys = new HashSet<String>();
 
         for (ChannelBuffer regionsa : buckets) {
             if (regionsa != null) {
@@ -162,7 +163,7 @@ public final class Partition {
                     int rkeySize = regions.readInt();
                     ChannelBuffer rkey = regions.readBytes(rkeySize);
 
-                    keys.add(new Key(rkey));
+                    keys.add(rkey.toString(UTF8));
                 }
             }
         }

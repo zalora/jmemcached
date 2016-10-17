@@ -1,45 +1,39 @@
-/**
- *  Copyright 2008 ThimbleWare Inc.
- *
- *  Licensed under the Apache License, Version 2.0 (the "License");
- *  you may not use this file except in compliance with the License.
- *  You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- *  Unless required by applicable law or agreed to in writing, software
- *  distributed under the License is distributed on an "AS IS" BASIS,
- *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *  See the License for the specific language governing permissions and
- *  limitations under the License.
- */
 package com.zalora.jmemcached;
 
+import lombok.Getter;
+import org.jboss.netty.buffer.*;
 import com.zalora.jmemcached.util.BufferUtils;
-import org.jboss.netty.buffer.ChannelBuffer;
-import org.jboss.netty.buffer.ChannelBuffers;
 
+import java.io.UnsupportedEncodingException;
+import java.nio.charset.Charset;
 
 /**
  * Represents information about a cache entry.
  */
 public final class LocalCacheElement implements CacheElement {
-    private long expire ;
-    private int flags;
+
     private ChannelBuffer data;
-    private Key key;
+
+    @Getter
+    private long expire;
+
+    @Getter
+    private int flags;
+
+    @Getter
+    private String key;
+
     private long casUnique = 0L;
     private boolean blocked = false;
     private long blockedUntil;
 
-    public LocalCacheElement() {
-    }
+    public LocalCacheElement() {}
 
-    public LocalCacheElement(Key key) {
+    public LocalCacheElement(String key) {
         this.key = key;
     }
 
-    public LocalCacheElement(Key key, int flags, long expire, long casUnique) {
+    public LocalCacheElement(String key, int flags, long expire, long casUnique) {
         this.key = key;
         this.flags = flags;
         this.expire = expire;
@@ -157,25 +151,13 @@ public final class LocalCacheElement implements CacheElement {
         return result;
     }
 
-    public static LocalCacheElement key(Key key) {
+    public static LocalCacheElement key(String key) {
         return new LocalCacheElement(key);
-    }
-
-    public long getExpire() {
-        return expire;
-    }
-
-    public int getFlags() {
-        return flags;
     }
 
     public ChannelBuffer getData() {
         data.readerIndex(0);
         return data;
-    }
-
-    public Key getKey() {
-        return key;
     }
 
     public long getCasUnique() {
@@ -199,7 +181,6 @@ public final class LocalCacheElement implements CacheElement {
         this.blockedUntil = blockedUntil;
     }
 
-
     public void setData(ChannelBuffer data) {
         data.readerIndex(0);
         this.data = data;
@@ -211,7 +192,7 @@ public final class LocalCacheElement implements CacheElement {
         int keyLength = in.readInt();
         ChannelBuffer key = in.slice(in.readerIndex(), keyLength);
         in.skipBytes(keyLength);
-        LocalCacheElement localCacheElement = new LocalCacheElement(new Key(key));
+        LocalCacheElement localCacheElement = new LocalCacheElement(key.toString(Charset.forName("UTF-8")));
 
         localCacheElement.expire = expiry;
         localCacheElement.flags = in.readInt();
@@ -228,14 +209,14 @@ public final class LocalCacheElement implements CacheElement {
     }
 
     public int bufferSize() {
-        return 4 + 8 + 4 + key.bytes.capacity() + 4 + 4 + 4 + data.capacity() + 8 + 1 + 8;
+        return 4 + 8 + 4 + key.length() + 4 + 4 + 4 + key.length() + 8 + 1 + 8;
     }
 
-    public void writeToBuffer(ChannelBuffer out) {
+    public void writeToBuffer(ChannelBuffer out) throws UnsupportedEncodingException {
         out.writeInt(bufferSize());
         out.writeLong(expire) ;
-        out.writeInt(key.bytes.capacity());
-        out.writeBytes(key.bytes);
+        out.writeInt(key.length());
+        out.writeBytes(key.getBytes("UTF-8"));
         out.writeInt(flags);
         out.writeInt(data.capacity());
         out.writeBytes(data);

@@ -1,6 +1,6 @@
 package com.zalora.jmemcached.storage;
 
-import com.zalora.jmemcached.storage.hash.SizedItem;
+import com.zalora.jmemcached.storage.SizedItem;
 
 import java.io.IOException;
 import java.util.concurrent.ConcurrentMap;

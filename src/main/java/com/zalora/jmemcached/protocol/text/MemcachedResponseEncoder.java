@@ -4,7 +4,6 @@ import com.zalora.jmemcached.Cache;
 import com.zalora.jmemcached.CacheElement;
 import com.zalora.jmemcached.protocol.Op;
 import com.zalora.jmemcached.protocol.ResponseMessage;
-import com.zalora.jmemcached.protocol.exceptions.ClientException;
 import com.zalora.jmemcached.util.BufferUtils;
 import org.jboss.netty.channel.*;
 import org.jboss.netty.buffer.ChannelBuffers;
@@ -12,10 +11,12 @@ import org.jboss.netty.buffer.ChannelBuffer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import static java.lang.String.valueOf;
-
+import java.nio.charset.Charset;
 import java.util.Set;
 import java.util.Map;
+import com.zalora.jmemcached.protocol.exceptions.ClientException;
+
+import static java.lang.String.valueOf;
 
 /**
  * Response encoder for the memcached text protocol. Produces strings destined for the StringEncoder
@@ -79,7 +80,7 @@ public final class MemcachedResponseEncoder<CACHE_ELEMENT extends CacheElement> 
                 for (CacheElement result : results) {
                     if (result != null) {
                         buffers[i++] = VALUE;
-                        buffers[i++] = result.getKey().bytes;
+                        buffers[i++] = ChannelBuffers.copiedBuffer(result.getKey().getBytes(Charset.forName("UTF-8")));
                         buffers[i++] = SPACE;
                         buffers[i++] = BufferUtils.itoa(result.getFlags());
                         buffers[i++] = SPACE;
@@ -125,6 +126,7 @@ public final class MemcachedResponseEncoder<CACHE_ELEMENT extends CacheElement> 
                         builder.append(" ");
                         builder.append(String.valueOf(statVal));
                         builder.append("\r\n");
+
                         Channels.write(channel, ChannelBuffers.copiedBuffer(builder.toString(), MemcachedPipelineFactory.USASCII));
                     }
                 }

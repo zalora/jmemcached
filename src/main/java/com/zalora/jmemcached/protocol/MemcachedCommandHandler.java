@@ -1,20 +1,4 @@
-/**
- *  Copyright 2008 ThimbleWare Inc.
- *
- *  Licensed under the Apache License, Version 2.0 (the "License");
- *  you may not use this file except in compliance with the License.
- *  You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- *  Unless required by applicable law or agreed to in writing, software
- *  distributed under the License is distributed on an "AS IS" BASIS,
- *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *  See the License for the specific language governing permissions and
- *  limitations under the License.
- */
 package com.zalora.jmemcached.protocol;
-
 
 import com.zalora.jmemcached.Cache;
 import com.zalora.jmemcached.CacheElement;
@@ -54,8 +38,6 @@ public final class MemcachedCommandHandler<CACHE_ELEMENT extends CacheElement> e
 
     public final int idle_limit;
     public final boolean verbose;
-
-
 
     /**
      * The actual physical data storage.
@@ -233,8 +215,9 @@ public final class MemcachedCommandHandler<CACHE_ELEMENT extends CacheElement> e
     protected void handleStats(ChannelHandlerContext channelHandlerContext, CommandMessage<CACHE_ELEMENT> command, int cmdKeysSize, Channel channel) {
         String option = "";
         if (cmdKeysSize > 0) {
-            option = command.keys.get(0).bytes.toString();
+            option = command.keys.get(0);
         }
+
         Channels.fireMessageReceived(channelHandlerContext, new ResponseMessage(command).withStatResponse(cache.stat(option)), channel.getRemoteAddress());
     }
 
@@ -290,7 +273,7 @@ public final class MemcachedCommandHandler<CACHE_ELEMENT extends CacheElement> e
     }
 
     protected void handleGets(ChannelHandlerContext channelHandlerContext, CommandMessage<CACHE_ELEMENT> command, Channel channel) {
-        Key[] keys = new Key[command.keys.size()];
+        String[] keys = new String[command.keys.size()];
         keys = command.keys.toArray(keys);
         CACHE_ELEMENT[] results = get(keys);
         ResponseMessage<CACHE_ELEMENT> resp = new ResponseMessage<CACHE_ELEMENT>(command).withElements(results);
@@ -303,10 +286,9 @@ public final class MemcachedCommandHandler<CACHE_ELEMENT extends CacheElement> e
      * @param keys the key for the element to lookup
      * @return the element, or 'null' in case of cache miss.
      */
-    private CACHE_ELEMENT[] get(Key... keys) {
+    private CACHE_ELEMENT[] get(String... keys) {
         return cache.get(keys);
     }
-
 
     /**
      * @return the current time in seconds (from epoch), used for expiries, etc.
@@ -314,8 +296,5 @@ public final class MemcachedCommandHandler<CACHE_ELEMENT extends CacheElement> e
     private static int Now() {
         return (int) (System.currentTimeMillis() / 1000);
     }
-
-
-
 
 }

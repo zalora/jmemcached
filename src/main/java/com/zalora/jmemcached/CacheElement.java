@@ -1,6 +1,6 @@
 package com.zalora.jmemcached;
 
-import com.zalora.jmemcached.storage.hash.SizedItem;
+import com.zalora.jmemcached.storage.SizedItem;
 import org.jboss.netty.buffer.ChannelBuffer;
 
 import java.io.Serializable;
@@ -22,7 +22,7 @@ public interface CacheElement extends Serializable, SizedItem {
 
     void setData(ChannelBuffer data);
 
-    Key getKey();
+    String getKey();
 
     long getCasUnique();
 
