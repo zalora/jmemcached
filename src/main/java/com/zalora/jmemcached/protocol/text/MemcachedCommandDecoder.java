@@ -23,8 +23,9 @@ import java.util.List;
 /**
  * The MemcachedCommandDecoder is responsible for taking lines from the MemcachedFrameDecoder and parsing them
  * into CommandMessage instances for handling by the MemcachedCommandHandler
- * <p/>
+ *
  * Protocol status is held in the SessionStatus instance which is shared between each of the decoders in the pipeline.
+ * @author Ryan Daum
  */
 public final class MemcachedCommandDecoder extends FrameDecoder {
 
@@ -32,7 +33,6 @@ public final class MemcachedCommandDecoder extends FrameDecoder {
     private SessionStatus status;
 
     private static final ChannelBuffer NOREPLY = ChannelBuffers.wrappedBuffer("noreply".getBytes());
-
 
     public MemcachedCommandDecoder(SessionStatus status) {
         this.status = status;
@@ -140,7 +140,6 @@ public final class MemcachedCommandDecoder extends FrameDecoder {
         // Produce the initial command message, for filling in later
         CommandMessage cmd = CommandMessage.command(op);
 
-
         switch (op) {
             case DELETE:
                 cmd.setKey(parts.get(1));
@@ -207,13 +206,7 @@ public final class MemcachedCommandDecoder extends FrameDecoder {
 
                 int flags = BufferUtils.atoi(parts.get(MIN_BYTES_LINE));
 
-                // Client has to set the expiration
-//                cmd.element = new LocalCacheElement(
-//                    parts.get(1).slice().toString(Charset.forName("UTF8")),
-//                    flags, expire != 0 && expire < CacheElement.THIRTY_DAYS ? LocalCacheElement.Now() + expire : expire,
-//                    0L
-//                );
-
+                // We're taking over the expiration values from the client
                 cmd.element = new LocalCacheElement(
                     parts.get(1).slice().toString(Charset.forName("UTF8")), flags, expire, 0L
                 );

@@ -3,12 +3,13 @@ package com.zalora.jmemcached.storage.bytebuffer;
 import com.zalora.jmemcached.LocalCacheElement;
 import com.zalora.jmemcached.storage.CacheStorage;
 
+import java.util.*;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
-import java.util.*;
 
 /**
- * Implementation of the cache using the block buffer storage back end.
+ * Implementation of the cache using the block buffer storage back end
+ * @author Ryan Daum
  */
 public final class BlockStorageCacheStorage implements CacheStorage<String, LocalCacheElement> {
 

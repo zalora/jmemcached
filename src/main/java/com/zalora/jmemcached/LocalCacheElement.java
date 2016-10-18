@@ -1,14 +1,16 @@
 package com.zalora.jmemcached;
 
 import lombok.Getter;
-import org.jboss.netty.buffer.*;
+import java.nio.charset.Charset;
+import org.jboss.netty.buffer.ChannelBuffer;
+import java.io.UnsupportedEncodingException;
+import org.jboss.netty.buffer.ChannelBuffers;
 import com.zalora.jmemcached.util.BufferUtils;
 
-import java.io.UnsupportedEncodingException;
-import java.nio.charset.Charset;
-
 /**
- * Represents information about a cache entry.
+ * Represents information about a cache entry
+ *
+ * @author Ryan Daum
  */
 public final class LocalCacheElement implements CacheElement {
 
@@ -27,7 +29,8 @@ public final class LocalCacheElement implements CacheElement {
     private boolean blocked = false;
     private long blockedUntil;
 
-    public LocalCacheElement() {}
+    public LocalCacheElement() {
+    }
 
     public LocalCacheElement(String key) {
         this.key = key;
@@ -45,6 +48,32 @@ public final class LocalCacheElement implements CacheElement {
      */
     public static int Now() {
         return (int) (System.currentTimeMillis() / 1000);
+    }
+
+    public static LocalCacheElement key(String key) {
+        return new LocalCacheElement(key);
+    }
+
+    public static LocalCacheElement readFromBuffer(ChannelBuffer in) {
+        int bufferSize = in.readInt();
+        long expiry = in.readLong();
+        int keyLength = in.readInt();
+        ChannelBuffer key = in.slice(in.readerIndex(), keyLength);
+        in.skipBytes(keyLength);
+        LocalCacheElement localCacheElement = new LocalCacheElement(key.toString(Charset.forName("UTF-8")));
+
+        localCacheElement.expire = expiry;
+        localCacheElement.flags = in.readInt();
+
+        int dataLength = in.readInt();
+        localCacheElement.data = in.slice(in.readerIndex(), dataLength);
+        in.skipBytes(dataLength);
+
+        localCacheElement.casUnique = in.readInt();
+        localCacheElement.blocked = in.readByte() == 1;
+        localCacheElement.blockedUntil = in.readLong();
+
+        return localCacheElement;
     }
 
     public int size() {
@@ -94,16 +123,6 @@ public final class LocalCacheElement implements CacheElement {
         return prependedElement;
     }
 
-    public static class IncrDecrResult {
-        int oldValue;
-        LocalCacheElement replace;
-
-        public IncrDecrResult(int oldValue, LocalCacheElement replace) {
-            this.oldValue = oldValue;
-            this.replace = replace;
-        }
-    }
-
     public IncrDecrResult add(int mod) {
         // TODO handle parse failure!
         int modVal = BufferUtils.atoi(getData()) + mod; // change value
@@ -151,17 +170,22 @@ public final class LocalCacheElement implements CacheElement {
         return result;
     }
 
-    public static LocalCacheElement key(String key) {
-        return new LocalCacheElement(key);
-    }
-
     public ChannelBuffer getData() {
         data.readerIndex(0);
         return data;
     }
 
+    public void setData(ChannelBuffer data) {
+        data.readerIndex(0);
+        this.data = data;
+    }
+
     public long getCasUnique() {
         return casUnique;
+    }
+
+    public void setCasUnique(long casUnique) {
+        this.casUnique = casUnique;
     }
 
     public boolean isBlocked() {
@@ -172,40 +196,9 @@ public final class LocalCacheElement implements CacheElement {
         return blockedUntil;
     }
 
-    public void setCasUnique(long casUnique) {
-        this.casUnique = casUnique;
-    }
-
     public void block(long blockedUntil) {
         this.blocked = true;
         this.blockedUntil = blockedUntil;
-    }
-
-    public void setData(ChannelBuffer data) {
-        data.readerIndex(0);
-        this.data = data;
-    }
-
-    public static LocalCacheElement readFromBuffer(ChannelBuffer in) {
-        int bufferSize = in.readInt();
-        long expiry = in.readLong();
-        int keyLength = in.readInt();
-        ChannelBuffer key = in.slice(in.readerIndex(), keyLength);
-        in.skipBytes(keyLength);
-        LocalCacheElement localCacheElement = new LocalCacheElement(key.toString(Charset.forName("UTF-8")));
-
-        localCacheElement.expire = expiry;
-        localCacheElement.flags = in.readInt();
-
-        int dataLength = in.readInt();
-        localCacheElement.data = in.slice(in.readerIndex(), dataLength);
-        in.skipBytes(dataLength);
-
-        localCacheElement.casUnique = in.readInt();
-        localCacheElement.blocked = in.readByte() == 1;
-        localCacheElement.blockedUntil = in.readLong();
-
-        return localCacheElement;
     }
 
     public int bufferSize() {
@@ -214,7 +207,7 @@ public final class LocalCacheElement implements CacheElement {
 
     public void writeToBuffer(ChannelBuffer out) throws UnsupportedEncodingException {
         out.writeInt(bufferSize());
-        out.writeLong(expire) ;
+        out.writeLong(expire);
         out.writeInt(key.length());
         out.writeBytes(key.getBytes("UTF-8"));
         out.writeInt(flags);
@@ -223,6 +216,16 @@ public final class LocalCacheElement implements CacheElement {
         out.writeLong(casUnique);
         out.writeByte(blocked ? 1 : 0);
         out.writeLong(blockedUntil);
+    }
+
+    public static class IncrDecrResult {
+        int oldValue;
+        LocalCacheElement replace;
+
+        public IncrDecrResult(int oldValue, LocalCacheElement replace) {
+            this.oldValue = oldValue;
+            this.replace = replace;
+        }
     }
 
 }

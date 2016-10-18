@@ -1,13 +1,14 @@
 package com.zalora.jmemcached;
 
+import java.io.Serializable;
 import com.zalora.jmemcached.storage.SizedItem;
 import org.jboss.netty.buffer.ChannelBuffer;
 
-import java.io.Serializable;
-
 /**
+ * @author Ryan Daum
  */
 public interface CacheElement extends Serializable, SizedItem {
+
     public final static long THIRTY_DAYS = 2592000000L;
 
     int size();
@@ -39,4 +40,5 @@ public interface CacheElement extends Serializable, SizedItem {
     CacheElement prepend(LocalCacheElement element);
 
     LocalCacheElement.IncrDecrResult add(int mod);
+
 }

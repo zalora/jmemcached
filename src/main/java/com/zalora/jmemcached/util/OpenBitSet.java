@@ -1,27 +1,11 @@
-/**
- * Licensed to the Apache Software Foundation (ASF) under one or more
- * contributor license agreements.  See the NOTICE file distributed with
- * this work for additional information regarding copyright ownership.
- * The ASF licenses this file to You under the Apache License, Version 2.0
- * (the "License"); you may not use this file except in compliance with
- * the License.  You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 package com.zalora.jmemcached.util;
 
-import java.util.Arrays;
 import java.io.Serializable;
+import java.util.Arrays;
 import java.util.BitSet;
 
-/** An "open" BitSet implementation that allows direct access to the array of words
+/**
+ * An "open" BitSet implementation that allows direct access to the array of words
  * storing the bits.
  * <p/>
  * Unlike java.util.bitset, the fact that bits are packed into an array of longs
@@ -41,38 +25,39 @@ import java.util.BitSet;
  * class, use <code>java.util.BitSet</code>.
  * <p/>
  * <h3>Performance Results</h3>
+ * <p>
+ * Test system: Pentium 4, Sun Java 1.5_06 -server -Xbatch -Xmx64M
+ * <br/>BitSet size = 1,000,000
+ * <br/>Results are java.util.BitSet time divided by OpenBitSet time.
+ * <table border="1">
+ * <tr>
+ * <th></th> <th>cardinality</th> <th>intersect_count</th> <th>union</th> <th>nextSetBit</th> <th>get</th> <th>iterator</th>
+ * </tr>
+ * <tr>
+ * <th>50% full</th> <td>3.36</td> <td>3.96</td> <td>1.44</td> <td>1.46</td> <td>1.99</td> <td>1.58</td>
+ * </tr>
+ * <tr>
+ * <th>1% full</th> <td>3.31</td> <td>3.90</td> <td>&nbsp;</td> <td>1.04</td> <td>&nbsp;</td> <td>0.99</td>
+ * </tr>
+ * </table>
+ * <br/>
+ * Test system: AMD Opteron, 64 bit linux, Sun Java 1.5_06 -server -Xbatch -Xmx64M
+ * <br/>BitSet size = 1,000,000
+ * <br/>Results are java.util.BitSet time divided by OpenBitSet time.
+ * <table border="1">
+ * <tr>
+ * <th></th> <th>cardinality</th> <th>intersect_count</th> <th>union</th> <th>nextSetBit</th> <th>get</th> <th>iterator</th>
+ * </tr>
+ * <tr>
+ * <th>50% full</th> <td>2.50</td> <td>3.50</td> <td>1.00</td> <td>1.03</td> <td>1.12</td> <td>1.25</td>
+ * </tr>
+ * <tr>
+ * <th>1% full</th> <td>2.51</td> <td>3.49</td> <td>&nbsp;</td> <td>1.00</td> <td>&nbsp;</td> <td>1.02</td>
+ * </tr>
+ * </table>
  *
- Test system: Pentium 4, Sun Java 1.5_06 -server -Xbatch -Xmx64M
- <br/>BitSet size = 1,000,000
- <br/>Results are java.util.BitSet time divided by OpenBitSet time.
- <table border="1">
- <tr>
- <th></th> <th>cardinality</th> <th>intersect_count</th> <th>union</th> <th>nextSetBit</th> <th>get</th> <th>iterator</th>
- </tr>
- <tr>
- <th>50% full</th> <td>3.36</td> <td>3.96</td> <td>1.44</td> <td>1.46</td> <td>1.99</td> <td>1.58</td>
- </tr>
- <tr>
- <th>1% full</th> <td>3.31</td> <td>3.90</td> <td>&nbsp;</td> <td>1.04</td> <td>&nbsp;</td> <td>0.99</td>
- </tr>
- </table>
- <br/>
- Test system: AMD Opteron, 64 bit linux, Sun Java 1.5_06 -server -Xbatch -Xmx64M
- <br/>BitSet size = 1,000,000
- <br/>Results are java.util.BitSet time divided by OpenBitSet time.
- <table border="1">
- <tr>
- <th></th> <th>cardinality</th> <th>intersect_count</th> <th>union</th> <th>nextSetBit</th> <th>get</th> <th>iterator</th>
- </tr>
- <tr>
- <th>50% full</th> <td>2.50</td> <td>3.50</td> <td>1.00</td> <td>1.03</td> <td>1.12</td> <td>1.25</td>
- </tr>
- <tr>
- <th>1% full</th> <td>2.51</td> <td>3.49</td> <td>&nbsp;</td> <td>1.00</td> <td>&nbsp;</td> <td>1.02</td>
- </tr>
- </table>
+ * @author Ryan Daum
  */
-
 public class OpenBitSet implements Cloneable, Serializable {
     private static final int OFFSET = 6;
 
@@ -80,7 +65,7 @@ public class OpenBitSet implements Cloneable, Serializable {
 
     private final static long ALLSET = 0xFFFFFFFFFFFFFFFFL;
 
-    private static final long[] TWO_N_ARRAY = new long[] { 0x1L, 0x2L, 0x4L,
+    private static final long[] TWO_N_ARRAY = new long[]{0x1L, 0x2L, 0x4L,
             0x8L, 0x10L, 0x20L, 0x40L, 0x80L, 0x100L, 0x200L, 0x400L, 0x800L,
             0x1000L, 0x2000L, 0x4000L, 0x8000L, 0x10000L, 0x20000L, 0x40000L,
             0x80000L, 0x100000L, 0x200000L, 0x400000L, 0x800000L, 0x1000000L,
@@ -94,12 +79,13 @@ public class OpenBitSet implements Cloneable, Serializable {
             0x20000000000000L, 0x40000000000000L, 0x80000000000000L,
             0x100000000000000L, 0x200000000000000L, 0x400000000000000L,
             0x800000000000000L, 0x1000000000000000L, 0x2000000000000000L,
-            0x4000000000000000L, 0x8000000000000000L };
+            0x4000000000000000L, 0x8000000000000000L};
 
     protected long[] bits;
     protected int wlen;   // number of words (elements) used in the array
 
-    /** Constructs an OpenBitSet large enough to hold numBits.
+    /**
+     * Constructs an OpenBitSet large enough to hold numBits.
      *
      * @param numBits
      */
@@ -112,7 +98,8 @@ public class OpenBitSet implements Cloneable, Serializable {
         this(64);
     }
 
-    /** Constructs an OpenBitSet from an existing long[].
+    /**
+     * Constructs an OpenBitSet from an existing long[].
      * <br/>
      * The first 64 bits are in long[0],
      * with bit index 0 at the least significant bit, and bit index 63 at the most significant.
@@ -123,7 +110,6 @@ public class OpenBitSet implements Cloneable, Serializable {
      * set bits (non-zero longs).
      * numWords should be &lt= bits.length, and
      * any existing words in the array at position &gt= numWords should be zero.
-     *
      */
     public OpenBitSet(long[] bits, int numWords) {
         this.bits = bits;
@@ -131,14 +117,75 @@ public class OpenBitSet implements Cloneable, Serializable {
     }
 
 
-    /** Contructs an OpenBitset from a BitSet
+    /**
+     * Contructs an OpenBitset from a BitSet
      */
     public OpenBitSet(BitSet bits) {
         this(bits.length());
     }
 
-    /** Returns the current capacity in bits (1 greater than the index of the last bit) */
-    public long capacity() { return bits.length << OFFSET; }
+    /**
+     * Returns the popcount or cardinality of the intersection of the two sets.
+     * Neither set is modified.
+     */
+    public static long intersectionCount(OpenBitSet a, OpenBitSet b) {
+        return BitUtil.pop_intersect(a.bits, b.bits, 0, Math.min(a.wlen, b.wlen));
+    }
+
+    /**
+     * Returns the popcount or cardinality of the union of the two sets.
+     * Neither set is modified.
+     */
+    public static long unionCount(OpenBitSet a, OpenBitSet b) {
+        long tot = BitUtil.pop_union(a.bits, b.bits, 0, Math.min(a.wlen, b.wlen));
+        if (a.wlen < b.wlen) {
+            tot += BitUtil.pop_array(b.bits, a.wlen, b.wlen - a.wlen);
+        } else if (a.wlen > b.wlen) {
+            tot += BitUtil.pop_array(a.bits, b.wlen, a.wlen - b.wlen);
+        }
+        return tot;
+    }
+
+    /**
+     * Returns the popcount or cardinality of "a and not b"
+     * or "intersection(a, not(b))".
+     * Neither set is modified.
+     */
+    public static long andNotCount(OpenBitSet a, OpenBitSet b) {
+        long tot = BitUtil.pop_andnot(a.bits, b.bits, 0, Math.min(a.wlen, b.wlen));
+        if (a.wlen > b.wlen) {
+            tot += BitUtil.pop_array(a.bits, b.wlen, a.wlen - b.wlen);
+        }
+        return tot;
+    }
+
+    /**
+     * Returns the popcount or cardinality of the exclusive-or of the two sets.
+     * Neither set is modified.
+     */
+    public static long xorCount(OpenBitSet a, OpenBitSet b) {
+        long tot = BitUtil.pop_xor(a.bits, b.bits, 0, Math.min(a.wlen, b.wlen));
+        if (a.wlen < b.wlen) {
+            tot += BitUtil.pop_array(b.bits, a.wlen, b.wlen - a.wlen);
+        } else if (a.wlen > b.wlen) {
+            tot += BitUtil.pop_array(a.bits, b.wlen, a.wlen - b.wlen);
+        }
+        return tot;
+    }
+
+    /**
+     * returns the number of 64 bit words it would take to hold numBits
+     */
+    public static int bits2words(long numBits) {
+        return (int) (((numBits - 1) >>> OFFSET) + 1);
+    }
+
+    /**
+     * Returns the current capacity in bits (1 greater than the index of the last bit)
+     */
+    public long capacity() {
+        return bits.length << OFFSET;
+    }
 
     /**
      * Returns the current capacity of this set.  Included for
@@ -153,68 +200,32 @@ public class OpenBitSet implements Cloneable, Serializable {
         return bits.length << OFFSET;
     }
 
-    /** Returns true if there are no set bits */
-    public boolean isEmpty() { return cardinality()==0; }
-
-    /** Expert: returns the long[] storing the bits */
-    public long[] getBits() { return bits; }
-
-    /** Expert: sets a new long[] to use as the bit storage */
-    public void setBits(long[] bits) { this.bits = bits; }
-
-    /** Expert: gets the number of longs in the array that are in use */
-    public int getNumWords() { return wlen; }
-
-    /** Expert: sets the number of longs in the array that are in use */
-    public void setNumWords(int nWords) { this.wlen=nWords; }
-
-
-
-    /** Returns true or false for the specified bit index. */
-    public boolean get(int index) {
-        int i = index >> OFFSET;               // div 64
-        // signed shift will keep a negative index and force an
-        // array-index-out-of-bounds-exception, removing the need for an explicit check.
-        if (i>=bits.length) return false;
-
-        int bit = index & 0x3f;           // mod 64
-        long bitmask = 1L << bit;
-        return (bits[i] & bitmask) != 0;
+    /**
+     * Returns true if there are no set bits
+     */
+    public boolean isEmpty() {
+        return cardinality() == 0;
     }
 
-
-    /** Returns true or false for the specified bit index.
-     * The index should be less than the OpenBitSet size
+    /**
+     * Expert: returns the long[] storing the bits
      */
-    public boolean fastGet(int index) {
-        int i = index >> OFFSET;               // div 64
-        // signed shift will keep a negative index and force an
-        // array-index-out-of-bounds-exception, removing the need for an explicit check.
-        int bit = index & 0x3f;           // mod 64
-        long bitmask = 1L << bit;
-        return (bits[i] & bitmask) != 0;
+    public long[] getBits() {
+        return bits;
     }
 
-
-
-    /** Returns true or false for the specified bit index
+    /**
+     * Expert: sets a new long[] to use as the bit storage
      */
-    public boolean get(long index) {
-        int i = (int)(index >> OFFSET);             // div 64
-        if (i>=bits.length) return false;
-        int bit = (int)index & 0x3f;           // mod 64
-        long bitmask = 1L << bit;
-        return (bits[i] & bitmask) != 0;
+    public void setBits(long[] bits) {
+        this.bits = bits;
     }
 
-    /** Returns true or false for the specified bit index.
-     * The index should be less than the OpenBitSet size.
+    /**
+     * Expert: gets the number of longs in the array that are in use
      */
-    public boolean fastGet(long index) {
-        int i = (int)(index >> OFFSET);               // div 64
-        int bit = (int)index & 0x3f;           // mod 64
-        long bitmask = 1L << bit;
-        return (bits[i] & bitmask) != 0;
+    public int getNumWords() {
+        return wlen;
     }
 
     /*
@@ -229,14 +240,11 @@ public class OpenBitSet implements Cloneable, Serializable {
     }
     */
 
-
-    /** returns 1 if the bit is set, 0 if not.
-     * The index should be less than the OpenBitSet size
+    /**
+     * Expert: sets the number of longs in the array that are in use
      */
-    public int getBit(int index) {
-        int i = index >> OFFSET;                // div 64
-        int bit = index & 0x3f;            // mod 64
-        return ((int)(bits[i]>>>bit)) & 0x01;
+    public void setNumWords(int nWords) {
+        this.wlen = nWords;
     }
 
 
@@ -249,16 +257,77 @@ public class OpenBitSet implements Cloneable, Serializable {
     }
     */
 
-    /** sets a bit, expanding the set size if necessary */
+    /**
+     * Returns true or false for the specified bit index.
+     */
+    public boolean get(int index) {
+        int i = index >> OFFSET;               // div 64
+        // signed shift will keep a negative index and force an
+        // array-index-out-of-bounds-exception, removing the need for an explicit check.
+        if (i >= bits.length) return false;
+
+        int bit = index & 0x3f;           // mod 64
+        long bitmask = 1L << bit;
+        return (bits[i] & bitmask) != 0;
+    }
+
+    /**
+     * Returns true or false for the specified bit index.
+     * The index should be less than the OpenBitSet size
+     */
+    public boolean fastGet(int index) {
+        int i = index >> OFFSET;               // div 64
+        // signed shift will keep a negative index and force an
+        // array-index-out-of-bounds-exception, removing the need for an explicit check.
+        int bit = index & 0x3f;           // mod 64
+        long bitmask = 1L << bit;
+        return (bits[i] & bitmask) != 0;
+    }
+
+    /**
+     * Returns true or false for the specified bit index
+     */
+    public boolean get(long index) {
+        int i = (int) (index >> OFFSET);             // div 64
+        if (i >= bits.length) return false;
+        int bit = (int) index & 0x3f;           // mod 64
+        long bitmask = 1L << bit;
+        return (bits[i] & bitmask) != 0;
+    }
+
+    /**
+     * Returns true or false for the specified bit index.
+     * The index should be less than the OpenBitSet size.
+     */
+    public boolean fastGet(long index) {
+        int i = (int) (index >> OFFSET);               // div 64
+        int bit = (int) index & 0x3f;           // mod 64
+        long bitmask = 1L << bit;
+        return (bits[i] & bitmask) != 0;
+    }
+
+    /**
+     * returns 1 if the bit is set, 0 if not.
+     * The index should be less than the OpenBitSet size
+     */
+    public int getBit(int index) {
+        int i = index >> OFFSET;                // div 64
+        int bit = index & 0x3f;            // mod 64
+        return ((int) (bits[i] >>> bit)) & 0x01;
+    }
+
+    /**
+     * sets a bit, expanding the set size if necessary
+     */
     public void set(long index) {
         int wordNum = expandingWordNum(index);
-        int bit = (int)index & 0x3f;
+        int bit = (int) index & 0x3f;
         long bitmask = 1L << bit;
         bits[wordNum] |= bitmask;
     }
 
-
-    /** Sets the bit at the specified index.
+    /**
+     * Sets the bit at the specified index.
      * The index should be less than the OpenBitSet size.
      */
     public void fastSet(int index) {
@@ -268,29 +337,31 @@ public class OpenBitSet implements Cloneable, Serializable {
         bits[wordNum] |= bitmask;
     }
 
-    /** Sets the bit at the specified index.
+    /**
+     * Sets the bit at the specified index.
      * The index should be less than the OpenBitSet size.
      */
     public void fastSet(long index) {
-        int wordNum = (int)(index >> OFFSET);
-        int bit = (int)index & 0x3f;
+        int wordNum = (int) (index >> OFFSET);
+        int bit = (int) index & 0x3f;
         long bitmask = 1L << bit;
         bits[wordNum] |= bitmask;
     }
 
-    /** Sets a range of bits, expanding the set size if necessary
+    /**
+     * Sets a range of bits, expanding the set size if necessary
      *
      * @param startIndex lower index
-     * @param endIndex one-past the last bit to set
+     * @param endIndex   one-past the last bit to set
      */
     public void set(long startIndex, long endIndex) {
         if (endIndex <= startIndex) return;
 
-        int startWord = (int)(startIndex>> OFFSET);
+        int startWord = (int) (startIndex >> OFFSET);
 
         // since endIndex is one past the end, this is index of the last
         // word to be changed.
-        int endWord   = expandingWordNum(endIndex-1);
+        int endWord = expandingWordNum(endIndex - 1);
 
         long startmask = -1L << startIndex;
         long endmask = -1L >>> -endIndex;  // 64-(endIndex&0x3f) is the same as -endIndex due to wrap
@@ -301,23 +372,21 @@ public class OpenBitSet implements Cloneable, Serializable {
         }
 
         bits[startWord] |= startmask;
-        Arrays.fill(bits, startWord+1, endWord, -1L);
+        Arrays.fill(bits, startWord + 1, endWord, -1L);
         bits[endWord] |= endmask;
     }
 
-
-
     protected int expandingWordNum(long index) {
-        int wordNum = (int)(index >> OFFSET);
-        if (wordNum>=wlen) {
-            ensureCapacity(index+1);
-            wlen = wordNum+1;
+        int wordNum = (int) (index >> OFFSET);
+        if (wordNum >= wlen) {
+            ensureCapacity(index + 1);
+            wlen = wordNum + 1;
         }
         return wordNum;
     }
 
-
-    /** clears a bit.
+    /**
+     * clears a bit.
      * The index should be less than the OpenBitSet size.
      */
     public void fastClear(int index) {
@@ -334,39 +403,43 @@ public class OpenBitSet implements Cloneable, Serializable {
         // bits[word] &= Long.rotateLeft(0xfffffffe,bit);
     }
 
-    /** clears a bit.
+    /**
+     * clears a bit.
      * The index should be less than the OpenBitSet size.
      */
     public void fastClear(long index) {
-        int wordNum = (int)(index >> OFFSET); // div 64
-        int bit = (int)index & 0x3f;     // mod 64
+        int wordNum = (int) (index >> OFFSET); // div 64
+        int bit = (int) index & 0x3f;     // mod 64
         long bitmask = 1L << bit;
         bits[wordNum] &= ~bitmask;
     }
 
-    /** clears a bit, allowing access beyond the current set size without changing the size.*/
+    /**
+     * clears a bit, allowing access beyond the current set size without changing the size.
+     */
     public void clear(long index) {
-        int wordNum = (int)(index >> OFFSET); // div 64
-        if (wordNum>=wlen) return;
-        int bit = (int)index & 0x3f;     // mod 64
+        int wordNum = (int) (index >> OFFSET); // div 64
+        if (wordNum >= wlen) return;
+        int bit = (int) index & 0x3f;     // mod 64
         long bitmask = 1L << bit;
         bits[wordNum] &= ~bitmask;
     }
 
-    /** Clears a range of bits.  Clearing past the end does not change the size of the set.
+    /**
+     * Clears a range of bits.  Clearing past the end does not change the size of the set.
      *
      * @param startIndex lower index
-     * @param endIndex one-past the last bit to clear
+     * @param endIndex   one-past the last bit to clear
      */
     public void clear(int startIndex, int endIndex) {
         if (endIndex <= startIndex) return;
 
-        int startWord = (startIndex>> OFFSET);
+        int startWord = (startIndex >> OFFSET);
         if (startWord >= wlen) return;
 
         // since endIndex is one past the end, this is index of the last
         // word to be changed.
-        int endWord   = ((endIndex-1)>> OFFSET);
+        int endWord = ((endIndex - 1) >> OFFSET);
 
         long startmask = -1L << startIndex;
         long endmask = -1L >>> -endIndex;  // 64-(endIndex&0x3f) is the same as -endIndex due to wrap
@@ -383,27 +456,27 @@ public class OpenBitSet implements Cloneable, Serializable {
         bits[startWord] &= startmask;
 
         int middle = Math.min(wlen, endWord);
-        Arrays.fill(bits, startWord+1, middle, 0L);
+        Arrays.fill(bits, startWord + 1, middle, 0L);
         if (endWord < wlen) {
             bits[endWord] &= endmask;
         }
     }
 
-
-    /** Clears a range of bits.  Clearing past the end does not change the size of the set.
+    /**
+     * Clears a range of bits.  Clearing past the end does not change the size of the set.
      *
      * @param startIndex lower index
-     * @param endIndex one-past the last bit to clear
+     * @param endIndex   one-past the last bit to clear
      */
     public void clear(long startIndex, long endIndex) {
         if (endIndex <= startIndex) return;
 
-        int startWord = (int)(startIndex>> OFFSET);
+        int startWord = (int) (startIndex >> OFFSET);
         if (startWord >= wlen) return;
 
         // since endIndex is one past the end, this is index of the last
         // word to be changed.
-        int endWord   = (int)((endIndex-1)>> OFFSET);
+        int endWord = (int) ((endIndex - 1) >> OFFSET);
 
         long startmask = -1L << startIndex;
         long endmask = -1L >>> -endIndex;  // 64-(endIndex&0x3f) is the same as -endIndex due to wrap
@@ -420,15 +493,14 @@ public class OpenBitSet implements Cloneable, Serializable {
         bits[startWord] &= startmask;
 
         int middle = Math.min(wlen, endWord);
-        Arrays.fill(bits, startWord+1, middle, 0L);
+        Arrays.fill(bits, startWord + 1, middle, 0L);
         if (endWord < wlen) {
             bits[endWord] &= endmask;
         }
     }
 
-
-
-    /** Sets a bit and returns the previous value.
+    /**
+     * Sets a bit and returns the previous value.
      * The index should be less than the OpenBitSet size.
      */
     public boolean getAndSet(int index) {
@@ -440,19 +512,21 @@ public class OpenBitSet implements Cloneable, Serializable {
         return val;
     }
 
-    /** Sets a bit and returns the previous value.
+    /**
+     * Sets a bit and returns the previous value.
      * The index should be less than the OpenBitSet size.
      */
     public boolean getAndSet(long index) {
-        int wordNum = (int)(index >> OFFSET);      // div 64
-        int bit = (int)index & 0x3f;     // mod 64
+        int wordNum = (int) (index >> OFFSET);      // div 64
+        int bit = (int) index & 0x3f;     // mod 64
         long bitmask = 1L << bit;
         boolean val = (bits[wordNum] & bitmask) != 0;
         bits[wordNum] |= bitmask;
         return val;
     }
 
-    /** flips a bit.
+    /**
+     * flips a bit.
      * The index should be less than the OpenBitSet size.
      */
     public void fastFlip(int index) {
@@ -460,83 +534,6 @@ public class OpenBitSet implements Cloneable, Serializable {
         int bit = index & 0x3f;     // mod 64
         long bitmask = 1L << bit;
         bits[wordNum] ^= bitmask;
-    }
-
-    /** flips a bit.
-     * The index should be less than the OpenBitSet size.
-     */
-    public void fastFlip(long index) {
-        int wordNum = (int)(index >> OFFSET);   // div 64
-        int bit = (int)index & 0x3f;       // mod 64
-        long bitmask = 1L << bit;
-        bits[wordNum] ^= bitmask;
-    }
-
-    /** flips a bit, expanding the set size if necessary */
-    public void flip(long index) {
-        int wordNum = expandingWordNum(index);
-        int bit = (int)index & 0x3f;       // mod 64
-        long bitmask = 1L << bit;
-        bits[wordNum] ^= bitmask;
-    }
-
-    /** flips a bit and returns the resulting bit value.
-     * The index should be less than the OpenBitSet size.
-     */
-    public boolean flipAndGet(int index) {
-        int wordNum = index >> OFFSET;      // div 64
-        int bit = index & 0x3f;     // mod 64
-        long bitmask = 1L << bit;
-        bits[wordNum] ^= bitmask;
-        return (bits[wordNum] & bitmask) != 0;
-    }
-
-    /** flips a bit and returns the resulting bit value.
-     * The index should be less than the OpenBitSet size.
-     */
-    public boolean flipAndGet(long index) {
-        int wordNum = (int)(index >> OFFSET);   // div 64
-        int bit = (int)index & 0x3f;       // mod 64
-        long bitmask = 1L << bit;
-        bits[wordNum] ^= bitmask;
-        return (bits[wordNum] & bitmask) != 0;
-    }
-
-    /** Flips a range of bits, expanding the set size if necessary
-     *
-     * @param startIndex lower index
-     * @param endIndex one-past the last bit to flip
-     */
-    public void flip(long startIndex, long endIndex) {
-        if (endIndex <= startIndex) return;
-        int startWord = (int)(startIndex>> OFFSET);
-
-        // since endIndex is one past the end, this is index of the last
-        // word to be changed.
-        int endWord   = expandingWordNum(endIndex-1);
-
-        /*** Grrr, java shifting wraps around so -1L>>>64 == -1
-         * for that reason, make sure not to use endmask if the bits to flip will
-         * be zero in the last word (redefine endWord to be the last changed...)
-         long startmask = -1L << (startIndex & 0x3f);     // example: 11111...111000
-         long endmask = -1L >>> (64-(endIndex & 0x3f));   // example: 00111...111111
-         ***/
-
-        long startmask = -1L << startIndex;
-        long endmask = -1L >>> -endIndex;  // 64-(endIndex&0x3f) is the same as -endIndex due to wrap
-
-        if (startWord == endWord) {
-            bits[startWord] ^= (startmask & endmask);
-            return;
-        }
-
-        bits[startWord] ^= startmask;
-
-        for (int i=startWord+1; i<endWord; i++) {
-            bits[i] = ~bits[i];
-        }
-
-        bits[endWord] ^= endmask;
     }
 
 
@@ -562,81 +559,119 @@ public class OpenBitSet implements Cloneable, Serializable {
     }
     */
 
+    /**
+     * flips a bit.
+     * The index should be less than the OpenBitSet size.
+     */
+    public void fastFlip(long index) {
+        int wordNum = (int) (index >> OFFSET);   // div 64
+        int bit = (int) index & 0x3f;       // mod 64
+        long bitmask = 1L << bit;
+        bits[wordNum] ^= bitmask;
+    }
 
-    /** @return the number of set bits */
+    /**
+     * flips a bit, expanding the set size if necessary
+     */
+    public void flip(long index) {
+        int wordNum = expandingWordNum(index);
+        int bit = (int) index & 0x3f;       // mod 64
+        long bitmask = 1L << bit;
+        bits[wordNum] ^= bitmask;
+    }
+
+    /**
+     * flips a bit and returns the resulting bit value.
+     * The index should be less than the OpenBitSet size.
+     */
+    public boolean flipAndGet(int index) {
+        int wordNum = index >> OFFSET;      // div 64
+        int bit = index & 0x3f;     // mod 64
+        long bitmask = 1L << bit;
+        bits[wordNum] ^= bitmask;
+        return (bits[wordNum] & bitmask) != 0;
+    }
+
+    /**
+     * flips a bit and returns the resulting bit value.
+     * The index should be less than the OpenBitSet size.
+     */
+    public boolean flipAndGet(long index) {
+        int wordNum = (int) (index >> OFFSET);   // div 64
+        int bit = (int) index & 0x3f;       // mod 64
+        long bitmask = 1L << bit;
+        bits[wordNum] ^= bitmask;
+        return (bits[wordNum] & bitmask) != 0;
+    }
+
+    /**
+     * Flips a range of bits, expanding the set size if necessary
+     *
+     * @param startIndex lower index
+     * @param endIndex   one-past the last bit to flip
+     */
+    public void flip(long startIndex, long endIndex) {
+        if (endIndex <= startIndex) return;
+        int startWord = (int) (startIndex >> OFFSET);
+
+        // since endIndex is one past the end, this is index of the last
+        // word to be changed.
+        int endWord = expandingWordNum(endIndex - 1);
+
+        /*** Grrr, java shifting wraps around so -1L>>>64 == -1
+         * for that reason, make sure not to use endmask if the bits to flip will
+         * be zero in the last word (redefine endWord to be the last changed...)
+         long startmask = -1L << (startIndex & 0x3f);     // example: 11111...111000
+         long endmask = -1L >>> (64-(endIndex & 0x3f));   // example: 00111...111111
+         ***/
+
+        long startmask = -1L << startIndex;
+        long endmask = -1L >>> -endIndex;  // 64-(endIndex&0x3f) is the same as -endIndex due to wrap
+
+        if (startWord == endWord) {
+            bits[startWord] ^= (startmask & endmask);
+            return;
+        }
+
+        bits[startWord] ^= startmask;
+
+        for (int i = startWord + 1; i < endWord; i++) {
+            bits[i] = ~bits[i];
+        }
+
+        bits[endWord] ^= endmask;
+    }
+
+    /**
+     * @return the number of set bits
+     */
     public long cardinality() {
-        return BitUtil.pop_array(bits,0,wlen);
+        return BitUtil.pop_array(bits, 0, wlen);
     }
 
-    /** Returns the popcount or cardinality of the intersection of the two sets.
-     * Neither set is modified.
-     */
-    public static long intersectionCount(OpenBitSet a, OpenBitSet b) {
-        return BitUtil.pop_intersect(a.bits, b.bits, 0, Math.min(a.wlen, b.wlen));
-    }
-
-    /** Returns the popcount or cardinality of the union of the two sets.
-     * Neither set is modified.
-     */
-    public static long unionCount(OpenBitSet a, OpenBitSet b) {
-        long tot = BitUtil.pop_union(a.bits, b.bits, 0, Math.min(a.wlen, b.wlen));
-        if (a.wlen < b.wlen) {
-            tot += BitUtil.pop_array(b.bits, a.wlen, b.wlen-a.wlen);
-        } else if (a.wlen > b.wlen) {
-            tot += BitUtil.pop_array(a.bits, b.wlen, a.wlen-b.wlen);
-        }
-        return tot;
-    }
-
-    /** Returns the popcount or cardinality of "a and not b"
-     * or "intersection(a, not(b))".
-     * Neither set is modified.
-     */
-    public static long andNotCount(OpenBitSet a, OpenBitSet b) {
-        long tot = BitUtil.pop_andnot(a.bits, b.bits, 0, Math.min(a.wlen, b.wlen));
-        if (a.wlen > b.wlen) {
-            tot += BitUtil.pop_array(a.bits, b.wlen, a.wlen-b.wlen);
-        }
-        return tot;
-    }
-
-    /** Returns the popcount or cardinality of the exclusive-or of the two sets.
-     * Neither set is modified.
-     */
-    public static long xorCount(OpenBitSet a, OpenBitSet b) {
-        long tot = BitUtil.pop_xor(a.bits, b.bits, 0, Math.min(a.wlen, b.wlen));
-        if (a.wlen < b.wlen) {
-            tot += BitUtil.pop_array(b.bits, a.wlen, b.wlen-a.wlen);
-        } else if (a.wlen > b.wlen) {
-            tot += BitUtil.pop_array(a.bits, b.wlen, a.wlen-b.wlen);
-        }
-        return tot;
-    }
-
-
-    /** Returns the index of the first set bit starting at the index specified.
-     *  -1 is returned if there are no more set bits.
+    /**
+     * Returns the index of the first set bit starting at the index specified.
+     * -1 is returned if there are no more set bits.
      */
     public int nextSetBit(int index) {
-        int i = index>> OFFSET;
-        if (i>=wlen) return -1;
+        int i = index >> OFFSET;
+        if (i >= wlen) return -1;
         int subIndex = index & 0x3f;      // index within the word
         long word = bits[i] >> subIndex;  // skip all the bits to the right of index
 
-        if (word!=0) {
-            return (i<< OFFSET) + subIndex + BitUtil.ntz(word);
+        if (word != 0) {
+            return (i << OFFSET) + subIndex + BitUtil.ntz(word);
         }
 
-        while(++i < wlen) {
+        while (++i < wlen) {
             word = bits[i];
-            if (word!=0) return (i<< OFFSET) + BitUtil.ntz(word);
+            if (word != 0) return (i << OFFSET) + BitUtil.ntz(word);
         }
 
         return -1;
     }
 
-    public int mark(int blocks_needed)
-    {
+    public int mark(int blocks_needed) {
         int count;
         int starting_block;
 
@@ -675,8 +710,8 @@ public class OpenBitSet implements Cloneable, Serializable {
                 if (b >= wdth) {
                     /* time to wrap around if we still haven't */
                     if (!over_the_top) {
-                        b=0;
-                        over_the_top=true;
+                        b = 0;
+                        over_the_top = true;
                         break;
                     } else {
                         return -1;
@@ -685,7 +720,7 @@ public class OpenBitSet implements Cloneable, Serializable {
             }
 
             if (count == blocks_needed) {
-                set(starting_block, b+blocks_needed);
+                set(starting_block, b + blocks_needed);
                 return starting_block;
             }
 
@@ -693,36 +728,32 @@ public class OpenBitSet implements Cloneable, Serializable {
         }
     }
 
-
-
-
-
-    /** Returns the index of the first set bit starting at the index specified.
-     *  -1 is returned if there are no more set bits.
+    /**
+     * Returns the index of the first set bit starting at the index specified.
+     * -1 is returned if there are no more set bits.
      */
     public long nextSetBit(long index) {
-        int i = (int)(index>>> OFFSET);
-        if (i>=wlen) return -1;
-        int subIndex = (int)index & 0x3f; // index within the word
+        int i = (int) (index >>> OFFSET);
+        if (i >= wlen) return -1;
+        int subIndex = (int) index & 0x3f; // index within the word
         long word = bits[i] >>> subIndex;  // skip all the bits to the right of index
 
-        if (word!=0) {
-            return (((long)i)<< OFFSET) + (subIndex + BitUtil.ntz(word));
+        if (word != 0) {
+            return (((long) i) << OFFSET) + (subIndex + BitUtil.ntz(word));
         }
 
-        while(++i < wlen) {
+        while (++i < wlen) {
             word = bits[i];
-            if (word!=0) return (((long)i)<< OFFSET) + BitUtil.ntz(word);
+            if (word != 0) return (((long) i) << OFFSET) + BitUtil.ntz(word);
         }
 
         return -1;
     }
 
-
     @Override
     public Object clone() {
         try {
-            OpenBitSet obs = (OpenBitSet)super.clone();
+            OpenBitSet obs = (OpenBitSet) super.clone();
             obs.bits = obs.bits.clone();  // hopefully an array clone is as fast(er) than arraycopy
             return obs;
         } catch (CloneNotSupportedException e) {
@@ -730,70 +761,77 @@ public class OpenBitSet implements Cloneable, Serializable {
         }
     }
 
-    /** this = this AND other */
+    /**
+     * this = this AND other
+     */
     public void intersect(OpenBitSet other) {
-        int newLen= Math.min(this.wlen,other.wlen);
+        int newLen = Math.min(this.wlen, other.wlen);
         long[] thisArr = this.bits;
         long[] otherArr = other.bits;
         // testing against zero can be more efficient
-        int pos=newLen;
-        while(--pos>=0) {
+        int pos = newLen;
+        while (--pos >= 0) {
             thisArr[pos] &= otherArr[pos];
         }
         if (this.wlen > newLen) {
             // fill zeros from the new shorter length to the old length
-            Arrays.fill(bits,newLen,this.wlen,0);
+            Arrays.fill(bits, newLen, this.wlen, 0);
         }
         this.wlen = newLen;
     }
 
-    /** this = this OR other */
+    /**
+     * this = this OR other
+     */
     public void union(OpenBitSet other) {
-        int newLen = Math.max(wlen,other.wlen);
+        int newLen = Math.max(wlen, other.wlen);
         ensureCapacityWords(newLen);
 
         long[] thisArr = this.bits;
         long[] otherArr = other.bits;
-        int pos=Math.min(wlen,other.wlen);
-        while(--pos>=0) {
+        int pos = Math.min(wlen, other.wlen);
+        while (--pos >= 0) {
             thisArr[pos] |= otherArr[pos];
         }
         if (this.wlen < newLen) {
-            System.arraycopy(otherArr, this.wlen, thisArr, this.wlen, newLen-this.wlen);
+            System.arraycopy(otherArr, this.wlen, thisArr, this.wlen, newLen - this.wlen);
         }
         this.wlen = newLen;
     }
 
-
-    /** Remove all elements set in other. this = this AND_NOT other */
+    /**
+     * Remove all elements set in other. this = this AND_NOT other
+     */
     public void remove(OpenBitSet other) {
-        int idx = Math.min(wlen,other.wlen);
+        int idx = Math.min(wlen, other.wlen);
         long[] thisArr = this.bits;
         long[] otherArr = other.bits;
-        while(--idx>=0) {
+        while (--idx >= 0) {
             thisArr[idx] &= ~otherArr[idx];
         }
     }
 
-    /** this = this XOR other */
+
+    // some BitSet compatability methods
+
+    /**
+     * this = this XOR other
+     */
     public void xor(OpenBitSet other) {
-        int newLen = Math.max(wlen,other.wlen);
+        int newLen = Math.max(wlen, other.wlen);
         ensureCapacityWords(newLen);
 
         long[] thisArr = this.bits;
         long[] otherArr = other.bits;
-        int pos=Math.min(wlen,other.wlen);
-        while(--pos>=0) {
+        int pos = Math.min(wlen, other.wlen);
+        while (--pos >= 0) {
             thisArr[pos] ^= otherArr[pos];
         }
         if (this.wlen < newLen) {
-            System.arraycopy(otherArr, this.wlen, thisArr, this.wlen, newLen-this.wlen);
+            System.arraycopy(otherArr, this.wlen, thisArr, this.wlen, newLen - this.wlen);
         }
         this.wlen = newLen;
     }
-
-
-    // some BitSet compatability methods
 
     //** see {@link intersect} */
     public void and(OpenBitSet other) {
@@ -810,20 +848,21 @@ public class OpenBitSet implements Cloneable, Serializable {
         remove(other);
     }
 
-    /** returns true if the sets have any elements in common */
+    /**
+     * returns true if the sets have any elements in common
+     */
     public boolean intersects(OpenBitSet other) {
         int pos = Math.min(this.wlen, other.wlen);
         long[] thisArr = this.bits;
         long[] otherArr = other.bits;
-        while (--pos>=0) {
-            if ((thisArr[pos] & otherArr[pos])!=0) return true;
+        while (--pos >= 0) {
+            if ((thisArr[pos] & otherArr[pos]) != 0) return true;
         }
         return false;
     }
 
-
-
-    /** Expand the long[] with the size given as a number of words (64 bit longs).
+    /**
+     * Expand the long[] with the size given as a number of words (64 bit longs).
      * getNumWords() is unchanged by this call.
      */
     public void ensureCapacityWords(int numWords) {
@@ -832,48 +871,47 @@ public class OpenBitSet implements Cloneable, Serializable {
         }
     }
 
-    /** Ensure that the long[] is big enough to hold numBits, expanding it if necessary.
+    /**
+     * Ensure that the long[] is big enough to hold numBits, expanding it if necessary.
      * getNumWords() is unchanged by this call.
      */
     public void ensureCapacity(long numBits) {
         ensureCapacityWords(bits2words(numBits));
     }
 
-    /** Lowers numWords, the number of words in use,
+    /**
+     * Lowers numWords, the number of words in use,
      * by checking for trailing zero words.
      */
     public void trimTrailingZeros() {
-        int idx = wlen-1;
-        while (idx>=0 && bits[idx]==0) idx--;
-        wlen = idx+1;
+        int idx = wlen - 1;
+        while (idx >= 0 && bits[idx] == 0) idx--;
+        wlen = idx + 1;
     }
 
-    /** returns the number of 64 bit words it would take to hold numBits */
-    public static int bits2words(long numBits) {
-        return (int)(((numBits-1)>>> OFFSET)+1);
-    }
-
-
-    /** returns true if both sets have the same bits set */
+    /**
+     * returns true if both sets have the same bits set
+     */
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (!(o instanceof OpenBitSet)) return false;
         OpenBitSet a;
-        OpenBitSet b = (OpenBitSet)o;
+        OpenBitSet b = (OpenBitSet) o;
         // make a the larger set.
         if (b.wlen > this.wlen) {
-            a = b; b=this;
+            a = b;
+            b = this;
         } else {
-            a=this;
+            a = this;
         }
 
         // check for any set bits out of the range of b
-        for (int i=a.wlen-1; i>=b.wlen; i--) {
-            if (a.bits[i]!=0) return false;
+        for (int i = a.wlen - 1; i >= b.wlen; i--) {
+            if (a.bits[i] != 0) return false;
         }
 
-        for (int i=b.wlen-1; i>=0; i--) {
+        for (int i = b.wlen - 1; i >= 0; i--) {
             if (a.bits[i] != b.bits[i]) return false;
         }
 
@@ -886,13 +924,13 @@ public class OpenBitSet implements Cloneable, Serializable {
         // Start with a zero hash and use a mix that results in zero if the input is zero.
         // This effectively truncates trailing zeros without an explicit check.
         long h = 0;
-        for (int i = bits.length; --i>=0;) {
+        for (int i = bits.length; --i >= 0; ) {
             h ^= bits[i];
             h = (h << 1) | (h >>> 63); // rotate left
         }
         // fold leftmost bits into right and add a constant to prevent
         // empty sets from returning 0, which is too common.
-        return (int)((h>>32) ^ h) + 0x98761234;
+        return (int) ((h >> 32) ^ h) + 0x98761234;
     }
 
 }

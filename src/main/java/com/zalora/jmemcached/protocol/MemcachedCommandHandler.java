@@ -1,16 +1,15 @@
 package com.zalora.jmemcached.protocol;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import java.util.concurrent.atomic.AtomicInteger;
+
 import com.zalora.jmemcached.Cache;
 import com.zalora.jmemcached.CacheElement;
 import com.zalora.jmemcached.protocol.exceptions.UnknownCommandException;
+
 import org.jboss.netty.channel.*;
 import org.jboss.netty.channel.group.DefaultChannelGroup;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import java.util.concurrent.atomic.AtomicInteger;
-
-// TODO implement flush_all delay
 
 /**
  * The actual command handler, which is responsible for processing the CommandMessage instances
@@ -20,6 +19,9 @@ import java.util.concurrent.atomic.AtomicInteger;
  * for the entire daemon.
  * <p/>
  * The command handler produces ResponseMessages which are destined for the response encoder.
+ *
+ * TODO implement flush_all delay
+ * @author Ryan Daum
  */
 @ChannelHandler.Sharable
 public final class MemcachedCommandHandler<CACHE_ELEMENT extends CacheElement> extends SimpleChannelUpstreamHandler {

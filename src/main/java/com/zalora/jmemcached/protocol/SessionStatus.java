@@ -3,7 +3,8 @@ package com.zalora.jmemcached.protocol;
 import java.io.Serializable;
 
 /**
- * Class for holding the current session status.
+ * Class for holding the current session status
+ * @author Ryan Daum
  */
 public final class SessionStatus implements Serializable {
 
@@ -25,10 +26,7 @@ public final class SessionStatus implements Serializable {
     // the current working command
     public CommandMessage cmd;
 
-
-    public SessionStatus() {
-        ready();
-    }
+    public SessionStatus() { ready(); }
 
     public SessionStatus ready() {
         this.cmd = null;

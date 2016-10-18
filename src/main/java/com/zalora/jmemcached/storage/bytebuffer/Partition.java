@@ -4,13 +4,16 @@ import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.buffer.ChannelBuffers;
 import com.zalora.jmemcached.LocalCacheElement;
 
-import java.io.UnsupportedEncodingException;
-import java.nio.charset.Charset;
-import java.util.Collection;
-import java.util.HashSet;
 import java.util.Set;
+import java.util.HashSet;
+import java.util.Collection;
+import java.nio.charset.Charset;
+import java.io.UnsupportedEncodingException;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
+/**
+ * @author Ryan Daum
+ */
 public final class Partition {
     private static final int NUM_BUCKETS = 32768;
 

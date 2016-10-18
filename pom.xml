@@ -12,22 +12,6 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
 
-    <developers>
-        <developer>
-            <email>wolfram.huesken@zalora.com</email>
-            <name>Wolfram Huesken</name>
-            <organization>Zalora Group</organization>
-            <organizationUrl>https://www.zalora.com</organizationUrl>
-        </developer>
-
-        <developer>
-            <email>ryan@thimbleware.com</email>
-            <name>Ryan Daum</name>
-            <organization>ThimbleWare Inc</organization>
-            <organizationUrl>http://www.thimbleware.com/</organizationUrl>
-        </developer>
-    </developers>
-
     <dependencies>
         <dependency>
             <groupId>org.slf4j</groupId>

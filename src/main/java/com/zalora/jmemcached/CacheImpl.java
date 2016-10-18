@@ -1,30 +1,14 @@
-/**
- *  Copyright 2008 ThimbleWare Inc.
- *
- *  Licensed under the Apache License, Version 2.0 (the "License");
- *  you may not use this file except in compliance with the License.
- *  You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- *  Unless required by applicable law or agreed to in writing, software
- *  distributed under the License is distributed on an "AS IS" BASIS,
- *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *  See the License for the specific language governing permissions and
- *  limitations under the License.
- */
 package com.zalora.jmemcached;
 
-import com.zalora.jmemcached.storage.CacheStorage;
-import org.jboss.netty.buffer.ChannelBuffers;
-
-import java.io.IOException;
-
 import java.util.Set;
+import java.io.IOException;
 import java.util.concurrent.*;
+import org.jboss.netty.buffer.ChannelBuffers;
+import com.zalora.jmemcached.storage.CacheStorage;
 
 /**
- * Default implementation of the cache handler, supporting local memory cache elements.
+ * Default implementation of the cache handler, supporting local memory cache elements
+ * @author Ryan Daum
  */
 public final class CacheImpl extends AbstractCache<LocalCacheElement> implements Cache<LocalCacheElement> {
 
@@ -41,7 +25,7 @@ public final class CacheImpl extends AbstractCache<LocalCacheElement> implements
         deleteQueue = new DelayQueue<DelayedMCElement>();
 
         scavenger = Executors.newScheduledThreadPool(1);
-        scavenger.scheduleAtFixedRate(new Runnable(){
+        scavenger.scheduleAtFixedRate(new Runnable() {
             public void run() {
                 asyncEventPing();
             }
@@ -59,7 +43,7 @@ public final class CacheImpl extends AbstractCache<LocalCacheElement> implements
             // block the element and schedule a delete; replace its entry with a blocked element
             LocalCacheElement placeHolder = new LocalCacheElement(key, 0, 0, 0L);
             placeHolder.setData(ChannelBuffers.buffer(0));
-            placeHolder.block(Now() + (long)time);
+            placeHolder.block(Now() + (long) time);
 
             storage.replace(key, placeHolder);
 
@@ -102,8 +86,7 @@ public final class CacheImpl extends AbstractCache<LocalCacheElement> implements
         if (old == null || isBlocked(old) || isExpired(old)) {
             getMisses.incrementAndGet();
             return StoreResponse.NOT_FOUND;
-        }
-        else {
+        } else {
             return storage.replace(old.getKey(), old, old.append(element)) ? StoreResponse.STORED : StoreResponse.NOT_STORED;
         }
     }
@@ -116,8 +99,7 @@ public final class CacheImpl extends AbstractCache<LocalCacheElement> implements
         if (old == null || isBlocked(old) || isExpired(old)) {
             getMisses.incrementAndGet();
             return StoreResponse.NOT_FOUND;
-        }
-        else {
+        } else {
             return storage.replace(old.getKey(), old, old.prepend(element)) ? StoreResponse.STORED : StoreResponse.NOT_STORED;
         }
     }
@@ -148,7 +130,7 @@ public final class CacheImpl extends AbstractCache<LocalCacheElement> implements
 
         if (element.getCasUnique() == cas_key) {
             // casUnique matches, now set the element
-        	e.setCasUnique(casCounter.getAndIncrement());
+            e.setCasUnique(casCounter.getAndIncrement());
             if (storage.replace(e.getKey(), element, e)) return StoreResponse.STORED;
             else {
                 getMisses.incrementAndGet();
@@ -186,7 +168,7 @@ public final class CacheImpl extends AbstractCache<LocalCacheElement> implements
     /**
      * @inheritDoc
      */
-    public LocalCacheElement[] get(String ... keys) {
+    public LocalCacheElement[] get(String... keys) {
         getCmds.incrementAndGet();//updates stats
 
         LocalCacheElement[] elements = new LocalCacheElement[keys.length];
@@ -234,7 +216,8 @@ public final class CacheImpl extends AbstractCache<LocalCacheElement> implements
      * @inheritDoc
      */
     public void close() throws IOException {
-        scavenger.shutdown();;
+        scavenger.shutdown();
+        ;
         storage.close();
     }
 
@@ -281,7 +264,6 @@ public final class CacheImpl extends AbstractCache<LocalCacheElement> implements
         }
     }
 
-
     /**
      * Delayed key blocks get processed occasionally.
      */
@@ -297,10 +279,12 @@ public final class CacheImpl extends AbstractCache<LocalCacheElement> implements
         }
 
         public int compareTo(Delayed delayed) {
-            if (!(delayed instanceof CacheImpl.DelayedMCElement))
+            if (!(delayed instanceof CacheImpl.DelayedMCElement)) {
                 return -1;
-            else
+            } else {
                 return element.getKey().toString().compareTo(((DelayedMCElement) delayed).element.getKey().toString());
+            }
         }
     }
+
 }

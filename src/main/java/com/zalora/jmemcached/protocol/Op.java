@@ -1,11 +1,13 @@
 package com.zalora.jmemcached.protocol;
 
+import java.util.Map;
+import java.util.HashMap;
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.buffer.ChannelBuffers;
 
-import java.util.HashMap;
-import java.util.Map;
-
+/**
+ * @author Ryan Daum
+ */
 public enum Op {
 
     GET, GETS, APPEND, PREPEND, DELETE, DECR,

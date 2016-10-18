@@ -1,17 +1,15 @@
 package com.zalora.jmemcached;
 
-import java.util.concurrent.atomic.AtomicInteger;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicLong;
-import java.util.Set;
-import java.util.Map;
-import java.util.HashMap;
-import java.util.HashSet;
+import java.util.concurrent.atomic.AtomicInteger;
 
-import static java.lang.String.*;
+import static java.lang.String.valueOf;
 
 /**
  * Abstract implementation of a cache handler for the memcache daemon; provides some convenience methods and
  * a general framework for implementation
+ * @author Ryan Daum
  */
 public abstract class AbstractCache<CACHE_ELEMENT extends CacheElement> implements Cache<CACHE_ELEMENT> {
 
@@ -110,13 +108,8 @@ public abstract class AbstractCache<CACHE_ELEMENT extends CacheElement> implemen
      */
     protected void initStats() {
         started.set(System.currentTimeMillis());
-//        getCmds.set(0);
-//        setCmds.set(0);
-//        getHits.set(0);
-//        getMisses.set(0);
-
-
     }
 
     public abstract void asyncEventPing();
+
 }

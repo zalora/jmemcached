@@ -1,9 +1,9 @@
 package com.zalora.jmemcached.protocol.binary;
 
+import com.zalora.jmemcached.CacheElement;
 import com.zalora.jmemcached.protocol.Op;
 import com.zalora.jmemcached.protocol.ResponseMessage;
 import com.zalora.jmemcached.protocol.exceptions.UnknownCommandException;
-import com.zalora.jmemcached.CacheElement;
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.buffer.ChannelBuffers;
 import org.jboss.netty.channel.*;
@@ -11,14 +11,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.nio.ByteOrder;
-import java.util.Set;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- *
+ * TODO refactor so this can be unit tested separate from netty? scalacheck?
+ * @author Ryan Daum
  */
-// TODO refactor so this can be unit tested separate from netty? scalacheck?
 @ChannelHandler.Sharable
 public class MemcachedBinaryResponseEncoder<CACHE_ELEMENT extends CacheElement> extends SimpleChannelUpstreamHandler {
 

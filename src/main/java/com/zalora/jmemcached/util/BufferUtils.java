@@ -3,33 +3,22 @@ package com.zalora.jmemcached.util;
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.buffer.ChannelBuffers;
 
-import java.nio.ByteBuffer;
-
 /**
+ * @author Ryan Daum
  */
 public class BufferUtils {
 
-    final static int [] sizeTable = { 9, 99, 999, 9999, 99999, 999999, 9999999,
-            99999999, 999999999, Integer.MAX_VALUE };
-    private static final ChannelBuffer LONG_MIN_VALUE_BYTES = ChannelBuffers.wrappedBuffer("-9223372036854775808".getBytes());
-
-    // Requires positive x
-    static int stringSize(int x) {
-        for (int i=0; ; i++)
-            if (x <= sizeTable[i])
-                return i+1;
-    }
-
+    final static int[] sizeTable = {9, 99, 999, 9999, 99999, 999999, 9999999,
+            99999999, 999999999, Integer.MAX_VALUE};
     final static byte[] digits = {
-            '0' , '1' , '2' , '3' , '4' , '5' ,
-            '6' , '7' , '8' , '9' , 'a' , 'b' ,
-            'c' , 'd' , 'e' , 'f' , 'g' , 'h' ,
-            'i' , 'j' , 'k' , 'l' , 'm' , 'n' ,
-            'o' , 'p' , 'q' , 'r' , 's' , 't' ,
-            'u' , 'v' , 'w' , 'x' , 'y' , 'z'
+            '0', '1', '2', '3', '4', '5',
+            '6', '7', '8', '9', 'a', 'b',
+            'c', 'd', 'e', 'f', 'g', 'h',
+            'i', 'j', 'k', 'l', 'm', 'n',
+            'o', 'p', 'q', 'r', 's', 't',
+            'u', 'v', 'w', 'x', 'y', 'z'
     };
-
-    final static byte [] DigitTens = {
+    final static byte[] DigitTens = {
             '0', '0', '0', '0', '0', '0', '0', '0', '0', '0',
             '1', '1', '1', '1', '1', '1', '1', '1', '1', '1',
             '2', '2', '2', '2', '2', '2', '2', '2', '2', '2',
@@ -40,25 +29,30 @@ public class BufferUtils {
             '7', '7', '7', '7', '7', '7', '7', '7', '7', '7',
             '8', '8', '8', '8', '8', '8', '8', '8', '8', '8',
             '9', '9', '9', '9', '9', '9', '9', '9', '9', '9',
-    } ;
+    };
+    final static byte[] DigitOnes = {
+            '0', '1', '2', '3', '4', '5', '6', '7', '8', '9',
+            '0', '1', '2', '3', '4', '5', '6', '7', '8', '9',
+            '0', '1', '2', '3', '4', '5', '6', '7', '8', '9',
+            '0', '1', '2', '3', '4', '5', '6', '7', '8', '9',
+            '0', '1', '2', '3', '4', '5', '6', '7', '8', '9',
+            '0', '1', '2', '3', '4', '5', '6', '7', '8', '9',
+            '0', '1', '2', '3', '4', '5', '6', '7', '8', '9',
+            '0', '1', '2', '3', '4', '5', '6', '7', '8', '9',
+            '0', '1', '2', '3', '4', '5', '6', '7', '8', '9',
+            '0', '1', '2', '3', '4', '5', '6', '7', '8', '9',
+    };
+    private static final ChannelBuffer LONG_MIN_VALUE_BYTES = ChannelBuffers.wrappedBuffer("-9223372036854775808".getBytes());
 
-    final static byte [] DigitOnes = {
-            '0', '1', '2', '3', '4', '5', '6', '7', '8', '9',
-            '0', '1', '2', '3', '4', '5', '6', '7', '8', '9',
-            '0', '1', '2', '3', '4', '5', '6', '7', '8', '9',
-            '0', '1', '2', '3', '4', '5', '6', '7', '8', '9',
-            '0', '1', '2', '3', '4', '5', '6', '7', '8', '9',
-            '0', '1', '2', '3', '4', '5', '6', '7', '8', '9',
-            '0', '1', '2', '3', '4', '5', '6', '7', '8', '9',
-            '0', '1', '2', '3', '4', '5', '6', '7', '8', '9',
-            '0', '1', '2', '3', '4', '5', '6', '7', '8', '9',
-            '0', '1', '2', '3', '4', '5', '6', '7', '8', '9',
-    } ;
-
+    // Requires positive x
+    static int stringSize(int x) {
+        for (int i = 0; ; i++)
+            if (x <= sizeTable[i])
+                return i + 1;
+    }
 
     public static int atoi(ChannelBuffer s)
-            throws NumberFormatException
-    {
+            throws NumberFormatException {
         int result = 0;
         boolean negative = false;
         int i = 0, len = s.capacity();
@@ -82,7 +76,7 @@ public class BufferUtils {
             multmin = limit / 10;
             while (i < len) {
                 // Accumulating negatively avoids surprises near MAX_VALUE
-                digit = Character.digit(s.getByte(i++),10);
+                digit = Character.digit(s.getByte(i++), 10);
                 if (digit < 0) {
                     throw new NumberFormatException();
                 }
@@ -102,8 +96,7 @@ public class BufferUtils {
     }
 
     public static long atol(ChannelBuffer s)
-            throws NumberFormatException
-    {
+            throws NumberFormatException {
         long result = 0;
         boolean negative = false;
         int i = 0, len = s.capacity();
@@ -127,7 +120,7 @@ public class BufferUtils {
             multmin = limit / 10;
             while (i < len) {
                 // Accumulating negatively avoids surprises near MAX_VALUE
-                digit = Character.digit(s.getByte(i++),10);
+                digit = Character.digit(s.getByte(i++), 10);
                 if (digit < 0) {
                     throw new NumberFormatException();
                 }
@@ -146,8 +139,10 @@ public class BufferUtils {
         return negative ? result : -result;
     }
 
-    /** Blatant copy of Integer.toString, but returning a byte array instead of a String, as
-     *  string charset decoding/encoding was killing us on performance.
+    /**
+     * Blatant copy of Integer.toString, but returning a byte array instead of a String, as
+     * string charset decoding/encoding was killing us on performance.
+     *
      * @param i integer to convert
      * @return byte[] array containing literal ASCII char representation
      */
@@ -174,7 +169,7 @@ public class BufferUtils {
      * the buffer backwards starting with the least significant
      * digit at the specified index (exclusive), and working
      * backwards from there.
-     *
+     * <p>
      * Will fail if i == Long.MIN_VALUE
      */
     static void getChars(long i, int index, ChannelBuffer buf) {
@@ -192,7 +187,7 @@ public class BufferUtils {
         while (i > Integer.MAX_VALUE) {
             q = i / 100;
             // really: r = i - (q * 100);
-            r = (int)(i - ((q << 6) + (q << 5) + (q << 2)));
+            r = (int) (i - ((q << 6) + (q << 5) + (q << 2)));
             i = q;
             buf.setByte(--charPos, DigitOnes[r]);
             buf.setByte(--charPos, DigitTens[r]);
@@ -200,7 +195,7 @@ public class BufferUtils {
 
         // Get 2 digits/iteration using ints
         int q2;
-        int i2 = (int)i;
+        int i2 = (int) i;
         while (i2 >= 65536) {
             q2 = i2 / 100;
             // really: r = i2 - (q * 100);
@@ -212,8 +207,8 @@ public class BufferUtils {
 
         // Fall thru to fast mode for smaller numbers
         // assert(i2 <= 65536, i2);
-        for (;;) {
-            q2 = (i2 * 52429) >>> (16+3);
+        for (; ; ) {
+            q2 = (i2 * 52429) >>> (16 + 3);
             r = i2 - ((q2 << 3) + (q2 << 1));  // r = i2-(q2*10) ...
             buf.setByte(--charPos, digits[r]);
             i2 = q2;
@@ -247,8 +242,8 @@ public class BufferUtils {
 
         // Fall thru to fast mode for smaller numbers
         // assert(i <= 65536, i);
-        for (;;) {
-            q = (i * 52429) >>> (16+3);
+        for (; ; ) {
+            q = (i * 52429) >>> (16 + 3);
             r = i - ((q << 3) + (q << 1));  // r = i-(q*10) ...
             buf.setByte(--charPos, digits[r]);
             i = q;
@@ -263,10 +258,10 @@ public class BufferUtils {
     // Requires positive x
     static int stringSize(long x) {
         long p = 10;
-        for (int i=1; i<19; i++) {
+        for (int i = 1; i < 19; i++) {
             if (x < p)
                 return i;
-            p = 10*p;
+            p = 10 * p;
         }
         return 19;
     }

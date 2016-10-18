@@ -1,9 +1,9 @@
 package com.zalora.jmemcached.protocol.binary;
 
-import com.zalora.jmemcached.LocalCacheElement;
 import com.zalora.jmemcached.CacheElement;
-import com.zalora.jmemcached.protocol.Op;
+import com.zalora.jmemcached.LocalCacheElement;
 import com.zalora.jmemcached.protocol.CommandMessage;
+import com.zalora.jmemcached.protocol.Op;
 import com.zalora.jmemcached.protocol.exceptions.MalformedCommandException;
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.buffer.ChannelBuffers;
@@ -11,77 +11,21 @@ import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelHandler;
 import org.jboss.netty.channel.ChannelHandlerContext;
 import org.jboss.netty.handler.codec.frame.FrameDecoder;
-import java.nio.charset.Charset;
+
 import java.nio.ByteOrder;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 
+/**
+ * @author Ryan Daum
+ */
 @ChannelHandler.Sharable
 public class MemcachedBinaryCommandDecoder extends FrameDecoder {
 
     public static final Charset USASCII = Charset.forName("US-ASCII");
 
-    public static enum BinaryOp {
-        Get(0x00, Op.GET, false),
-        Set(0x01, Op.SET, false),
-        Add(0x02, Op.ADD, false),
-        Replace(0x03, Op.REPLACE, false),
-        Delete(0x04, Op.DELETE, false),
-        Increment(0x05, Op.INCR, false),
-        Decrement(0x06, Op.DECR, false),
-        Quit(0x07, Op.QUIT, false),
-        Flush(0x08, Op.FLUSH_ALL, false),
-        GetQ(0x09, Op.GET, false),
-        Noop(0x0A, null, false),
-        Version(0x0B, Op.VERSION, false),
-        GetK(0x0C, Op.GET, false, true),
-        GetKQ(0x0D, Op.GET, true, true),
-        Append(0x0E, Op.APPEND, false),
-        Prepend(0x0F, Op.PREPEND, false),
-        Stat(0x10, Op.STATS, false),
-        SetQ(0x11, Op.SET, true),
-        AddQ(0x12, Op.ADD, true),
-        ReplaceQ(0x13, Op.REPLACE, true),
-        DeleteQ(0x14, Op.DELETE, true),
-        IncrementQ(0x15, Op.INCR, true),
-        DecrementQ(0x16, Op.DECR, true),
-        QuitQ(0x17, Op.QUIT, true),
-        FlushQ(0x18, Op.FLUSH_ALL, true),
-        AppendQ(0x19, Op.APPEND, true),
-        PrependQ(0x1A, Op.PREPEND, true);
-
-        public byte code;
-        public Op correspondingOp;
-        public boolean noreply;
-        public boolean addKeyToResponse = false;
-
-        BinaryOp(int code, Op correspondingOp, boolean noreply) {
-            this.code = (byte)code;
-            this.correspondingOp = correspondingOp;
-            this.noreply = noreply;
-        }
-
-        BinaryOp(int code, Op correspondingOp, boolean noreply, boolean addKeyToResponse) {
-            this.code = (byte)code;
-            this.correspondingOp = correspondingOp;
-            this.noreply = noreply;
-            this.addKeyToResponse = addKeyToResponse;
-        }
-
-        public static BinaryOp forCommandMessage(CommandMessage msg) {
-            for (BinaryOp binaryOp : values()) {
-                if (binaryOp.correspondingOp == msg.op && binaryOp.noreply == msg.noreply &&
-                    binaryOp.addKeyToResponse == msg.addKeyToResponse) {
-                    return binaryOp;
-                }
-            }
-
-            return null;
-        }
-
-    }
-
     protected Object decode(ChannelHandlerContext channelHandlerContext, Channel channel, ChannelBuffer channelBuffer)
-        throws Exception {
+            throws Exception {
 
         // need at least 24 bytes, to get header
         if (channelBuffer.readableBytes() < 24) return null;
@@ -144,8 +88,7 @@ public class MemcachedBinaryCommandDecoder extends FrameDecoder {
                     cmdType == Op.SET ||
                     cmdType == Op.REPLACE ||
                     cmdType == Op.APPEND ||
-                    cmdType == Op.PREPEND)
-            {
+                    cmdType == Op.PREPEND) {
                 // TODO these are backwards from the spec, but seem to be what spymemcached demands -- which has the mistake?!
                 long expire = ((short) (extrasBuffer.capacity() != 0 ? extrasBuffer.readUnsignedShort() : 0)) * 1000;
                 short flags = (short) (extrasBuffer.capacity() != 0 ? extrasBuffer.readUnsignedShort() : 0);
@@ -154,10 +97,10 @@ public class MemcachedBinaryCommandDecoder extends FrameDecoder {
                 int size = totalBodyLength - keyLength - extraLength;
 
                 cmdMessage.element = new LocalCacheElement(
-                    keyBuffer.slice().toString(Charset.forName("UTF-8")),
-                    flags,
-                    expire != 0 && expire < CacheElement.THIRTY_DAYS ? LocalCacheElement.Now() + expire : expire,
-                    0L
+                        keyBuffer.slice().toString(Charset.forName("UTF-8")),
+                        flags,
+                        expire != 0 && expire < CacheElement.THIRTY_DAYS ? LocalCacheElement.Now() + expire : expire,
+                        0L
                 );
 
                 ChannelBuffer data = ChannelBuffers.buffer(size);
@@ -173,5 +116,65 @@ public class MemcachedBinaryCommandDecoder extends FrameDecoder {
         }
 
         return cmdMessage;
+    }
+
+    public static enum BinaryOp {
+        Get(0x00, Op.GET, false),
+        Set(0x01, Op.SET, false),
+        Add(0x02, Op.ADD, false),
+        Replace(0x03, Op.REPLACE, false),
+        Delete(0x04, Op.DELETE, false),
+        Increment(0x05, Op.INCR, false),
+        Decrement(0x06, Op.DECR, false),
+        Quit(0x07, Op.QUIT, false),
+        Flush(0x08, Op.FLUSH_ALL, false),
+        GetQ(0x09, Op.GET, false),
+        Noop(0x0A, null, false),
+        Version(0x0B, Op.VERSION, false),
+        GetK(0x0C, Op.GET, false, true),
+        GetKQ(0x0D, Op.GET, true, true),
+        Append(0x0E, Op.APPEND, false),
+        Prepend(0x0F, Op.PREPEND, false),
+        Stat(0x10, Op.STATS, false),
+        SetQ(0x11, Op.SET, true),
+        AddQ(0x12, Op.ADD, true),
+        ReplaceQ(0x13, Op.REPLACE, true),
+        DeleteQ(0x14, Op.DELETE, true),
+        IncrementQ(0x15, Op.INCR, true),
+        DecrementQ(0x16, Op.DECR, true),
+        QuitQ(0x17, Op.QUIT, true),
+        FlushQ(0x18, Op.FLUSH_ALL, true),
+        AppendQ(0x19, Op.APPEND, true),
+        PrependQ(0x1A, Op.PREPEND, true);
+
+        public byte code;
+        public Op correspondingOp;
+        public boolean noreply;
+        public boolean addKeyToResponse = false;
+
+        BinaryOp(int code, Op correspondingOp, boolean noreply) {
+            this.code = (byte) code;
+            this.correspondingOp = correspondingOp;
+            this.noreply = noreply;
+        }
+
+        BinaryOp(int code, Op correspondingOp, boolean noreply, boolean addKeyToResponse) {
+            this.code = (byte) code;
+            this.correspondingOp = correspondingOp;
+            this.noreply = noreply;
+            this.addKeyToResponse = addKeyToResponse;
+        }
+
+        public static BinaryOp forCommandMessage(CommandMessage msg) {
+            for (BinaryOp binaryOp : values()) {
+                if (binaryOp.correspondingOp == msg.op && binaryOp.noreply == msg.noreply &&
+                        binaryOp.addKeyToResponse == msg.addKeyToResponse) {
+                    return binaryOp;
+                }
+            }
+
+            return null;
+        }
+
     }
 }

@@ -1,15 +1,16 @@
 package com.zalora.jmemcached.storage;
 
-import com.zalora.jmemcached.storage.SizedItem;
-
 import java.io.IOException;
 import java.util.concurrent.ConcurrentMap;
+import com.zalora.jmemcached.storage.SizedItem;
 
 /**
  * The interface for cache storage. Essentially a concurrent map but with methods for investigating the heap
  * state of the storage unit and with additional support for explicit resource-cleanup (close()).
+ * @author Ryan Daum
  */
 public interface CacheStorage<K, V extends SizedItem> extends ConcurrentMap<K, V> {
+
     /**
      * @return the capacity (in bytes) of the storage
      */
@@ -30,4 +31,5 @@ public interface CacheStorage<K, V extends SizedItem> extends ConcurrentMap<K, V
      * @throws java.io.IOException thrown if IO faults occur anywhere during close.
      */
     void close() throws IOException;
+
 }

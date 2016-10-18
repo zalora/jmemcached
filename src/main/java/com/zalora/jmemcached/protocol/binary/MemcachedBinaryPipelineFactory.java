@@ -7,10 +7,12 @@ import org.jboss.netty.channel.ChannelPipelineFactory;
 import org.jboss.netty.channel.Channels;
 import org.jboss.netty.channel.group.DefaultChannelGroup;
 
-
+/**
+ * @author Ryan Daum
+ */
 public class MemcachedBinaryPipelineFactory implements ChannelPipelineFactory {
 
-    private final MemcachedBinaryCommandDecoder decoder =  new MemcachedBinaryCommandDecoder();
+    private final MemcachedBinaryCommandDecoder decoder = new MemcachedBinaryCommandDecoder();
     private final MemcachedCommandHandler memcachedCommandHandler;
     private final MemcachedBinaryResponseEncoder memcachedBinaryResponseEncoder = new MemcachedBinaryResponseEncoder();
 

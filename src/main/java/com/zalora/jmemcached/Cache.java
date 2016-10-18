@@ -1,30 +1,17 @@
 package com.zalora.jmemcached;
 
 import java.io.IOException;
-import java.util.Set;
 import java.util.Map;
+import java.util.Set;
 
 /**
+ * @author Ryan Daum
  */
 public interface Cache<CACHE_ELEMENT extends CacheElement> {
     /**
-     * Enum defining response statuses from set/add type commands
-     */
-    public enum StoreResponse {
-        STORED, NOT_STORED, EXISTS, NOT_FOUND
-    }
-
-    /**
-     * Enum defining responses statuses from removal commands
-     */
-    public enum DeleteResponse {
-        DELETED, NOT_FOUND
-    }
-
-    /**
      * Handle the deletion of an item from the cache.
      *
-     * @param key the key for the item
+     * @param key  the key for the item
      * @param time an amount of time to block this entry in the cache for further writes
      * @return the message response
      */
@@ -73,14 +60,16 @@ public interface Cache<CACHE_ELEMENT extends CacheElement> {
     /**
      * Set an element in the cache but only if the element has not been touched
      * since the last 'gets'
+     *
      * @param cas_key the cas key returned by the last gets
-     * @param e the element to set
+     * @param e       the element to set
      * @return the store response code
      */
     StoreResponse cas(Long cas_key, CACHE_ELEMENT e);
 
     /**
      * Increment/decremen t an (integer) element in the cache
+     *
      * @param key the key to increment
      * @param mod the amount to add to the value
      * @return the message response
@@ -89,19 +78,22 @@ public interface Cache<CACHE_ELEMENT extends CacheElement> {
 
     /**
      * Get element(s) from the cache
+     *
      * @param keys the key for the element to lookup
      * @return the element, or 'null' in case of cache miss.
      */
-    CACHE_ELEMENT[] get(String ... keys);
+    CACHE_ELEMENT[] get(String... keys);
 
     /**
      * Flush all cache entries
+     *
      * @return command response
      */
     boolean flush_all();
 
     /**
      * Flush all cache entries with a timestamp after a given expiration time
+     *
      * @param expire the flush time in seconds
      * @return command response
      */
@@ -109,10 +101,10 @@ public interface Cache<CACHE_ELEMENT extends CacheElement> {
 
     /**
      * Close the cache, freeing all resources on which it depends.
+     *
      * @throws IOException
      */
     void close() throws IOException;
-
 
     /**
      * @return the # of items in the cache
@@ -151,6 +143,7 @@ public interface Cache<CACHE_ELEMENT extends CacheElement> {
 
     /**
      * Retrieve stats about the cache. If an argument is specified, a specific category of stats is requested.
+     *
      * @param arg a specific extended stat sub-category
      * @return a map of stats
      */
@@ -161,5 +154,19 @@ public interface Cache<CACHE_ELEMENT extends CacheElement> {
      * (such as delete queues, etc.)
      */
     void asyncEventPing();
+
+    /**
+     * Enum defining response statuses from set/add type commands
+     */
+    public enum StoreResponse {
+        STORED, NOT_STORED, EXISTS, NOT_FOUND
+    }
+
+    /**
+     * Enum defining responses statuses from removal commands
+     */
+    public enum DeleteResponse {
+        DELETED, NOT_FOUND
+    }
 
 }

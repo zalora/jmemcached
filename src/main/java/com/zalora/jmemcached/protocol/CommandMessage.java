@@ -8,6 +8,7 @@ import org.jboss.netty.buffer.ChannelBuffer;
 
 /**
  * The payload object holding the parsed message.
+ * @author Ryan Daum
  */
 public final class CommandMessage<CACHE_ELEMENT extends CacheElement> implements Serializable {
 

@@ -12,20 +12,17 @@ import java.io.IOException;
  * Allows memory for storage to be mapped outside of the VM's main memory, and outside the purvey
  * of the GC.
  *
- * Should offer O(Log(N)) search and free of blocks.
+ * Should offer O(Log(N)) search and free of blocks
+ * @author Ryan Daum
  */
 public class ByteBufferBlockStore {
 
     protected ChannelBuffer storageBuffer;
-
     private long freeBytes;
-
     private long storeSizeBytes;
     private final int blockSizeBytes;
-
     private OpenBitSet allocated;
     private static final ByteBufferBlockStoreFactory BYTE_BUFFER_BLOCK_STORE_FACTORY = new ByteBufferBlockStoreFactory();
-
 
     /**
      * Exception thrown on inability to allocate a new block
@@ -35,6 +32,7 @@ public class ByteBufferBlockStore {
             super(s);
         }
     }
+
     public static BlockStoreFactory getFactory() {
         return BYTE_BUFFER_BLOCK_STORE_FACTORY;
     }
@@ -49,6 +47,7 @@ public class ByteBufferBlockStore {
                 throw new RuntimeException(e);
             }
         }
+
     }
 
     /**
@@ -105,7 +104,6 @@ public class ByteBufferBlockStore {
         // clear the region list
         clear();
 
-        //
         freeResources();
 
         // null out the storage to allow the GC to get rid of it
@@ -121,8 +119,6 @@ public class ByteBufferBlockStore {
         if (mark == -1) throw new BadAllocationException("unable to allocate room; all blocks consumed");
         return mark;
     }
-
-
 
     private void clear(int start, int numBlocks) {
         allocated.clear(start, start + numBlocks);
@@ -174,8 +170,6 @@ public class ByteBufferBlockStore {
         freeBytes = storeSizeBytes;
     }
 
-
-
     public long getStoreSizeBytes() {
         return storeSizeBytes;
     }
@@ -187,7 +181,5 @@ public class ByteBufferBlockStore {
     public long getFreeBytes() {
         return freeBytes;
     }
-
-
 
 }

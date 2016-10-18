@@ -1,14 +1,15 @@
 package com.zalora.jmemcached.storage.bytebuffer;
 
-import com.zalora.jmemcached.LocalCacheElement;
-import org.jboss.netty.buffer.ChannelBuffer;
-
 import java.nio.charset.Charset;
+import org.jboss.netty.buffer.ChannelBuffer;
+import com.zalora.jmemcached.LocalCacheElement;
 
 /**
-     * Represents a number of allocated blocks in the store
+ * Represents a number of allocated blocks in the store
+ * @author Ryan Daum
  */
 public final class Region {
+
     /**
      * Size in bytes of the requested area
      */
@@ -23,7 +24,6 @@ public final class Region {
      * Offset into the memory region
      */
     final int startBlock;
-
 
     final long timestamp;
 

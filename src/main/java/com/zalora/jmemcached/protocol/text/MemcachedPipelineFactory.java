@@ -10,6 +10,9 @@ import org.jboss.netty.channel.ChannelPipeline;
 import org.jboss.netty.channel.ChannelPipelineFactory;
 import org.jboss.netty.channel.group.DefaultChannelGroup;
 
+/**
+ * @author Ryan Daum
+ */
 public final class MemcachedPipelineFactory implements ChannelPipelineFactory {
 
     public static final Charset USASCII = Charset.forName("US-ASCII");
@@ -22,7 +25,6 @@ public final class MemcachedPipelineFactory implements ChannelPipelineFactory {
     private DefaultChannelGroup channelGroup;
     private final MemcachedResponseEncoder memcachedResponseEncoder = new MemcachedResponseEncoder();
     private final MemcachedCommandHandler memcachedCommandHandler;
-
 
     public MemcachedPipelineFactory(Cache cache, String version, boolean verbose, int idleTime, int frameSize, DefaultChannelGroup channelGroup) {
         this.cache = cache;
