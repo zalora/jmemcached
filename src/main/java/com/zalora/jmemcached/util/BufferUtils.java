@@ -95,8 +95,7 @@ public class BufferUtils {
         return negative ? result : -result;
     }
 
-    public static long atol(ChannelBuffer s)
-            throws NumberFormatException {
+    public static long atol(ChannelBuffer s) throws NumberFormatException {
         long result = 0;
         boolean negative = false;
         int i = 0, len = s.capacity();
