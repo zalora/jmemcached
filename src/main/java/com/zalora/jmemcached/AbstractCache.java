@@ -74,7 +74,7 @@ public abstract class AbstractCache<CACHE_ELEMENT extends CacheElement> implemen
         multiSet(result, "get_misses", valueOf(getGetMisses()));
         multiSet(result, "time", valueOf(valueOf(Now())));
         multiSet(result, "uptime", valueOf(Now() - this.started.longValue()));
-        multiSet(result, "cur_items", valueOf(this.getCurrentItems()));
+        multiSet(result, "curr_items", valueOf(this.getCurrentItems()));
         multiSet(result, "limit_maxbytes", valueOf(this.getLimitMaxBytes()));
         multiSet(result, "current_bytes", valueOf(this.getCurrentBytes()));
         multiSet(result, "free_bytes", valueOf(Runtime.getRuntime().freeMemory()));
