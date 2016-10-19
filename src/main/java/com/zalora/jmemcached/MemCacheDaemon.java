@@ -23,7 +23,7 @@ import java.util.concurrent.Executors;
 @Slf4j
 public class MemCacheDaemon<CACHE_ELEMENT extends CacheElement> {
 
-    public static String memcachedVersion = "0.9";
+    public static String memcachedVersion = "1.0.3";
 
     private int frameSize = 32768 * 1024;
 

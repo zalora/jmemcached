@@ -66,30 +66,68 @@ public abstract class AbstractCache<CACHE_ELEMENT extends CacheElement> implemen
     public final Map<String, Set<String>> stat(String arg) {
         Map<String, Set<String>> result = new HashMap<String, Set<String>>();
 
-        // stats we know
+        // Stats we know
         multiSet(result, "version", MemCacheDaemon.memcachedVersion);
-        multiSet(result, "cmd_gets", valueOf(getGetCmds()));
-        multiSet(result, "cmd_sets", valueOf(getSetCmds()));
+        multiSet(result, "cmd_get", valueOf(getGetCmds()));
+        multiSet(result, "cmd_set", valueOf(getSetCmds()));
         multiSet(result, "get_hits", valueOf(getGetHits()));
         multiSet(result, "get_misses", valueOf(getGetMisses()));
-        multiSet(result, "time", valueOf(valueOf(Now())));
-        multiSet(result, "uptime", valueOf(Now() - this.started.longValue()));
+        multiSet(result, "time", valueOf(System.currentTimeMillis() / 1000));
+        multiSet(result, "uptime", valueOf((System.currentTimeMillis() - this.started.longValue()) / 1000));
         multiSet(result, "curr_items", valueOf(this.getCurrentItems()));
         multiSet(result, "limit_maxbytes", valueOf(this.getLimitMaxBytes()));
         multiSet(result, "current_bytes", valueOf(this.getCurrentBytes()));
         multiSet(result, "free_bytes", valueOf(Runtime.getRuntime().freeMemory()));
 
-        // Not really the same thing precisely, but meaningful nonetheless. potentially this should be renamed
-        multiSet(result, "pid", valueOf(Thread.currentThread().getId()));
-
-        // stuff we know nothing about; gets faked only because some clients expect this
-        multiSet(result, "rusage_user", "0:0");
-        multiSet(result, "rusage_system", "0:0");
-        multiSet(result, "connection_structures", "0");
-
         // TODO we could collect these stats
         multiSet(result, "bytes_read", "0");
         multiSet(result, "bytes_written", "0");
+        multiSet(result, "total_connections", "0");
+        multiSet(result, "bytes", "0");
+        multiSet(result, "total_items", "0");
+
+        // Fake stats added for PHP
+        multiSet(result, "rusage_user", "0");
+        multiSet(result, "rusage_system", "0");
+        multiSet(result, "connection_structures", "0");
+        multiSet(result, "libevent", "undefined");
+        multiSet(result, "libevent", "64");
+        multiSet(result, "curr_connections", "1");
+        multiSet(result, "reserved_fds", "20");
+        multiSet(result, "cmd_flush", "0");
+        multiSet(result, "cmd_touch", "0");
+        multiSet(result, "delete_misses", "0");
+        multiSet(result, "delete_hits", "0");
+        multiSet(result, "incr_misses", "0");
+        multiSet(result, "incr_hits", "0");
+        multiSet(result, "decr_misses", "0");
+        multiSet(result, "decr_hits", "0");
+        multiSet(result, "cas_misses", "0");
+        multiSet(result, "cas_hits", "0");
+        multiSet(result, "cas_badval", "0");
+        multiSet(result, "touch_hits", "0");
+        multiSet(result, "touch_misses", "0");
+        multiSet(result, "conn_yields", "0");
+        multiSet(result, "hash_power_level", "0");
+        multiSet(result, "hash_bytes", "0");
+        multiSet(result, "hash_is_expanding", "0");
+        multiSet(result, "malloc_fails", "0");
+        multiSet(result, "auth_cmds", "0");
+        multiSet(result, "auth_errors", "0");
+        multiSet(result, "expired_unfetched", "0");
+        multiSet(result, "evicted_unfetched", "0");
+        multiSet(result, "evictions", "0");
+        multiSet(result, "reclaimed", "0");
+        multiSet(result, "crawler_reclaimed", "0");
+        multiSet(result, "crawler_items_checked", "0");
+        multiSet(result, "lrutail_reflocked", "0");
+        multiSet(result, "accepting_conns", "1");
+        multiSet(result, "listen_disabled_num", "0");
+        multiSet(result, "time_in_listen_disabled_us", "0");
+
+        // Not really the same thing precisely, but meaningful nonetheless
+        multiSet(result, "pid", valueOf(Thread.currentThread().getId()));
+        multiSet(result, "threads", valueOf(Runtime.getRuntime().availableProcessors()));
 
         return result;
     }
