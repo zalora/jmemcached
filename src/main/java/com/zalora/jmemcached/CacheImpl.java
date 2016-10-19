@@ -1,14 +1,19 @@
 package com.zalora.jmemcached;
 
-import java.util.Set;
-import java.io.IOException;
-import java.util.concurrent.*;
-import org.jboss.netty.buffer.ChannelBuffers;
 import com.zalora.jmemcached.storage.CacheStorage;
+import org.jboss.netty.buffer.ChannelBuffers;
+
+import java.io.IOException;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.concurrent.*;
 
 /**
  * Default implementation of the cache handler, supporting local memory cache elements
+ *
  * @author Ryan Daum
+ * @author Wolfram Huesken <wolfram.huesken@zalora.com>
  */
 public final class CacheImpl extends AbstractCache<LocalCacheElement> implements Cache<LocalCacheElement> {
 
@@ -156,7 +161,6 @@ public final class CacheImpl extends AbstractCache<LocalCacheElement> implements
         }
     }
 
-
     protected boolean isBlocked(CacheElement e) {
         return e.isBlocked() && e.getBlockedUntil() > Now();
     }
@@ -169,12 +173,24 @@ public final class CacheImpl extends AbstractCache<LocalCacheElement> implements
      * @inheritDoc
      */
     public LocalCacheElement[] get(String... keys) {
-        getCmds.incrementAndGet();//updates stats
+        getCmds.incrementAndGet(); //updates stats
 
         LocalCacheElement[] elements = new LocalCacheElement[keys.length];
         int x = 0;
         int hits = 0;
         int misses = 0;
+
+        if (keys.length > 1) {
+            storage.getMulti(new HashSet<String>(Arrays.asList(keys))).toArray(elements);
+
+            if (keys.length - elements.length > 0) {
+                getMisses.addAndGet(keys.length - elements.length);
+            }
+
+            getHits.addAndGet(elements.length);
+            return elements;
+        }
+
         for (String key : keys) {
             LocalCacheElement e = storage.get(key);
             if (e == null || isExpired(e) || e.isBlocked()) {
@@ -189,6 +205,7 @@ public final class CacheImpl extends AbstractCache<LocalCacheElement> implements
             x++;
 
         }
+
         getMisses.addAndGet(misses);
         getHits.addAndGet(hits);
 
