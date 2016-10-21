@@ -20,7 +20,7 @@ public final class LocalCacheElement implements CacheElement {
     private long expire;
 
     @Getter
-    private int flags;
+    private long flags;
 
     @Getter
     private String key;
@@ -36,7 +36,7 @@ public final class LocalCacheElement implements CacheElement {
         this.key = key;
     }
 
-    public LocalCacheElement(String key, int flags, long expire, long casUnique) {
+    public LocalCacheElement(String key, long flags, long expire, long casUnique) {
         this.key = key;
         this.flags = flags;
         this.expire = expire;
@@ -161,7 +161,7 @@ public final class LocalCacheElement implements CacheElement {
     @Override
     public int hashCode() {
         int result = (int) (expire ^ (expire >>> 32));
-        result = 31 * result + flags;
+        result = 31 * result + (int) flags;
         result = 31 * result + (data != null ? data.hashCode() : 0);
         result = 31 * result + (key != null ? key.hashCode() : 0);
         result = 31 * result + (int) (casUnique ^ (casUnique >>> 32));
@@ -210,7 +210,7 @@ public final class LocalCacheElement implements CacheElement {
         out.writeLong(expire);
         out.writeInt(key.length());
         out.writeBytes(key.getBytes("UTF-8"));
-        out.writeInt(flags);
+        out.writeLong(flags);
         out.writeInt(data.capacity());
         out.writeBytes(data);
         out.writeLong(casUnique);

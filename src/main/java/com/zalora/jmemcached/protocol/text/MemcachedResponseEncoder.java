@@ -14,6 +14,7 @@ import org.slf4j.LoggerFactory;
 import java.nio.charset.Charset;
 import java.util.Set;
 import java.util.Map;
+
 import com.zalora.jmemcached.protocol.exceptions.ClientException;
 
 import static java.lang.String.valueOf;
@@ -24,7 +25,6 @@ import static java.lang.String.valueOf;
 public final class MemcachedResponseEncoder<CACHE_ELEMENT extends CacheElement> extends SimpleChannelUpstreamHandler {
 
     final Logger logger = LoggerFactory.getLogger(MemcachedResponseEncoder.class);
-
 
     public static final ChannelBuffer CRLF = ChannelBuffers.copiedBuffer("\r\n", MemcachedPipelineFactory.USASCII);
     private static final ChannelBuffer SPACE = ChannelBuffers.copiedBuffer(" ", MemcachedPipelineFactory.USASCII);
@@ -60,14 +60,10 @@ public final class MemcachedResponseEncoder<CACHE_ELEMENT extends CacheElement> 
         }
     }
 
-
-
     @Override
     public void messageReceived(ChannelHandlerContext channelHandlerContext, MessageEvent messageEvent) throws Exception {
         ResponseMessage<CACHE_ELEMENT> command = (ResponseMessage<CACHE_ELEMENT>) messageEvent.getMessage();
-
         Op cmd = command.cmd.op;
-
         Channel channel = messageEvent.getChannel();
 
         switch (cmd) {
@@ -82,7 +78,7 @@ public final class MemcachedResponseEncoder<CACHE_ELEMENT extends CacheElement> 
                         buffers[i++] = VALUE;
                         buffers[i++] = ChannelBuffers.copiedBuffer(result.getKey().getBytes(Charset.forName("UTF-8")));
                         buffers[i++] = SPACE;
-                        buffers[i++] = BufferUtils.itoa(result.getFlags());
+                        buffers[i++] = BufferUtils.ltoa(result.getFlags());
                         buffers[i++] = SPACE;
                         buffers[i++] = BufferUtils.itoa(result.size());
                         if (cmd == Op.GETS) {
@@ -108,9 +104,9 @@ public final class MemcachedResponseEncoder<CACHE_ELEMENT extends CacheElement> 
                     Channels.write(channel, storeResponse(command.response));
                 break;
             case DELETE:
-                if (!command.cmd.noreply)
+                if (!command.cmd.noreply) {
                     Channels.write(channel, deleteResponseString(command.deleteResponse));
-
+                }
                 break;
             case DECR:
             case INCR:
@@ -130,20 +126,18 @@ public final class MemcachedResponseEncoder<CACHE_ELEMENT extends CacheElement> 
                         Channels.write(channel, ChannelBuffers.copiedBuffer(builder.toString(), MemcachedPipelineFactory.USASCII));
                     }
                 }
-                Channels.write(channel, END.duplicate());
 
+                Channels.write(channel, END.duplicate());
                 break;
             case VERSION:
                 Channels.write(channel, ChannelBuffers.copiedBuffer("VERSION " + command.version + "\r\n", MemcachedPipelineFactory.USASCII));
                 break;
             case QUIT:
                 Channels.disconnect(channel);
-
                 break;
             case FLUSH_ALL:
                 if (!command.cmd.noreply) {
                     ChannelBuffer ret = command.flushSuccess ? OK.duplicate() : ERROR.duplicate();
-
                     Channels.write(channel, ret);
                 }
                 break;
@@ -152,9 +146,7 @@ public final class MemcachedResponseEncoder<CACHE_ELEMENT extends CacheElement> 
             default:
                 Channels.write(channel, ERROR.duplicate());
                 logger.error("error; unrecognized command: " + cmd);
-
         }
-
     }
 
     private ChannelBuffer deleteResponseString(Cache.DeleteResponse deleteResponse) {
@@ -162,12 +154,12 @@ public final class MemcachedResponseEncoder<CACHE_ELEMENT extends CacheElement> 
         else return NOT_FOUND.duplicate();
     }
 
-
     private ChannelBuffer incrDecrResponseString(Integer ret) {
-        if (ret == null)
+        if (ret == null) {
             return NOT_FOUND.duplicate();
-        else
+        } else {
             return ChannelBuffers.copiedBuffer(valueOf(ret) + "\r\n", MemcachedPipelineFactory.USASCII);
+        }
     }
 
     /**
@@ -190,4 +182,5 @@ public final class MemcachedResponseEncoder<CACHE_ELEMENT extends CacheElement> 
         }
         throw new RuntimeException("unknown store response from cache: " + storeResponse);
     }
+
 }
