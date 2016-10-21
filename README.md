@@ -1,4 +1,4 @@
-# JMemcached
+# JMemcached [![](https://jitpack.io/v/zalora/jmemcached.svg)](https://jitpack.io/#zalora/jmemcached)
 
 JMemcached is a Java based Memcached frontend originally written by Ryan Daum: https://github.com/rdaum/jmemcache-daemon
 
