@@ -1,13 +1,12 @@
 package com.zalora.jmemcached;
 
 import com.zalora.jmemcached.storage.CacheStorage;
-import org.jboss.netty.buffer.ChannelBuffers;
-
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.*;
+import org.jboss.netty.buffer.ChannelBuffers;
 
 /**
  * Default implementation of the cache handler, supporting local memory cache elements
@@ -54,12 +53,15 @@ public final class CacheImpl extends AbstractCache<LocalCacheElement> implements
 
             // this must go on a queue for processing later...
             deleteQueue.add(new DelayedMCElement(placeHolder));
-        } else
+        } else {
             removed = storage.remove(key) != null;
+        }
 
-        if (removed) return DeleteResponse.DELETED;
-        else return DeleteResponse.NOT_FOUND;
+        if (removed) {
+            return DeleteResponse.DELETED;
+        }
 
+        return DeleteResponse.NOT_FOUND;
     }
 
     /**
@@ -88,7 +90,7 @@ public final class CacheImpl extends AbstractCache<LocalCacheElement> implements
      */
     public StoreResponse append(LocalCacheElement element) {
         LocalCacheElement old = storage.get(element.getKey());
-        if (old == null || isBlocked(old) || isExpired(old)) {
+        if (old == null || isBlocked(old)) {
             getMisses.incrementAndGet();
             return StoreResponse.NOT_FOUND;
         } else {
@@ -101,7 +103,7 @@ public final class CacheImpl extends AbstractCache<LocalCacheElement> implements
      */
     public StoreResponse prepend(LocalCacheElement element) {
         LocalCacheElement old = storage.get(element.getKey());
-        if (old == null || isBlocked(old) || isExpired(old)) {
+        if (old == null || isBlocked(old)) {
             getMisses.incrementAndGet();
             return StoreResponse.NOT_FOUND;
         } else {
@@ -114,9 +116,7 @@ public final class CacheImpl extends AbstractCache<LocalCacheElement> implements
      */
     public StoreResponse set(LocalCacheElement e) {
         setCmds.incrementAndGet();//update stats
-
         e.setCasUnique(casCounter.getAndIncrement());
-
         storage.put(e.getKey(), e);
 
         return StoreResponse.STORED;
@@ -152,7 +152,7 @@ public final class CacheImpl extends AbstractCache<LocalCacheElement> implements
      */
     public Integer get_add(String key, int mod) {
         LocalCacheElement old = storage.get(key);
-        if (old == null || isBlocked(old) || isExpired(old)) {
+        if (old == null || isBlocked(old)) {
             getMisses.incrementAndGet();
             return null;
         } else {
@@ -163,10 +163,6 @@ public final class CacheImpl extends AbstractCache<LocalCacheElement> implements
 
     protected boolean isBlocked(CacheElement e) {
         return e.isBlocked() && e.getBlockedUntil() > Now();
-    }
-
-    protected boolean isExpired(CacheElement e) {
-        return e.getExpire() != 0 && e.getExpire() < Now();
     }
 
     /**
@@ -193,17 +189,15 @@ public final class CacheImpl extends AbstractCache<LocalCacheElement> implements
 
         for (String key : keys) {
             LocalCacheElement e = storage.get(key);
-            if (e == null || isExpired(e) || e.isBlocked()) {
+            if (e == null || e.isBlocked()) {
                 misses++;
-
                 elements[x] = null;
             } else {
                 hits++;
-
                 elements[x] = e;
             }
-            x++;
 
+            x++;
         }
 
         getMisses.addAndGet(misses);
@@ -224,7 +218,6 @@ public final class CacheImpl extends AbstractCache<LocalCacheElement> implements
      * @inheritDoc
      */
     public boolean flush_all(int expire) {
-        // TODO implement this, it isn't right... but how to handle efficiently? (don't want to linear scan entire cacheStorage)
         storage.clear();
         return true;
     }
@@ -234,7 +227,6 @@ public final class CacheImpl extends AbstractCache<LocalCacheElement> implements
      */
     public void close() throws IOException {
         scavenger.shutdown();
-        ;
         storage.close();
     }
 

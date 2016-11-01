@@ -40,7 +40,6 @@ public abstract class AbstractCache<CACHE_ELEMENT extends CacheElement> implemen
 
     public abstract long getCurrentBytes();
 
-
     public final int getGetCmds() {
         return getCmds.get();
     }
